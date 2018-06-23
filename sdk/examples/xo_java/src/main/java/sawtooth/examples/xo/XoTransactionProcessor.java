@@ -26,5 +26,7 @@ public class XoTransactionProcessor {
     transactionProcessor.addHandler(new XoHandler());
     Thread thread = new Thread(transactionProcessor);
     thread.start();
+    
+    
   }
 }

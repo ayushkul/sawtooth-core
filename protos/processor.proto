@@ -103,3 +103,4 @@ message TpProcessResponse {
     // data that will be propagated back to the transaction submitter.
     bytes extended_data = 3;
 }
+

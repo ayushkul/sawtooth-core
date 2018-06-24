@@ -18,6 +18,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 
+import com.google.common.eventbus.EventBus;
+
 import sawtooth.examples.xo.spring.demo.config.CoreConfig;
 import sawtooth.examples.xo.spring.demo.config.OperationsListener;
 import sawtooth.examples.xo.spring.demo.tasks.EchoWorker;
@@ -46,7 +48,6 @@ public class SpringAsyncMQProxy {
 	}
 
 	public static void main(String[] args) throws Exception {
-
 		SpringApplicationBuilder spBuilder = new SpringApplicationBuilder().headless(true)
 				.properties("logging.config=classpath:log4j2.properties").main(SpringAsyncMQProxy.class)
 				.sources(SpringAsyncMQProxy.class);

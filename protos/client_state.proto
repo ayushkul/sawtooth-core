@@ -106,3 +106,4 @@ message ClientStateGetResponse {
     bytes value = 2;
     string state_root = 3;
 }
+

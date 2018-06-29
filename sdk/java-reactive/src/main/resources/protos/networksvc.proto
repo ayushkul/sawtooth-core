@@ -1,0 +1,18 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "sawtooth.sdk.reactive.protobuf";
+
+import "network.proto";
+
+service GetPeersService {
+  rpc listPeers (GetPeersRequest) returns (GetPeersResponse);
+}
+
+service PingService {
+  rpc ping (PingRequest) returns (PingResponse);
+}
+
+service PeerRegisterService {
+  rpc register (PeerRegisterRequest) returns (PeerRegisterRequest);
+}
+

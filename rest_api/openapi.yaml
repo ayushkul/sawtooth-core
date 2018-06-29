@@ -628,10 +628,10 @@ definitions:
         items:
           type: string
           example: 1baee350bdb60bcee60e3d325d43283cf830b4c23b2cb17d3bb43935bd7af3761c2bee79847c72a9e396a9ae58f48add4e43f94eb83f84442c6085c1dd5d4dbe
-      family_name:
+      family_name: 
         type: string
         example: intkey
-      family_version:
+      family_version: 
         type: string
         example: "1.0"
       inputs:
@@ -673,7 +673,7 @@ definitions:
         type: array
         items:
           properties:
-            type:
+            type: 
               type: string
               example: SET
             address:
@@ -686,7 +686,7 @@ definitions:
         type: array
         items:
           properties:
-            event_type:
+            event_type: 
               type: string
               example: sawtooth/block-commit
             attributes:
@@ -708,7 +708,7 @@ definitions:
   TransactionReceipts:
     type: array
     items:
-      - $ref: "#/definitions/TransactionReceipt"
+      $ref: "#/definitions/TransactionReceipt"
 
   BatchHeader:
     properties:

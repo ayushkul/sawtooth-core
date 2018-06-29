@@ -1,0 +1,13 @@
+syntax = "proto3";
+option java_multiple_files = true;
+option java_package = "sawtooth.sdk.reactive.protobuf";
+
+import "client_state.proto";
+
+service ClientStateListService {
+  rpc list (ClientStateListRequest) returns (ClientStateListResponse);
+}
+
+service ClientStateQueryService {
+  rpc query (ClientStateGetRequest) returns (ClientStateGetResponse);
+}

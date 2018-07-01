@@ -1,9 +1,9 @@
-package sawtooth.sdk.reactive.comm;
+package sawtooth.sdk.messaging;
 
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 
-import com.google.protobuf.Message;
-
+import sawtooth.sdk.protobuf.Message;
 import sawtooth.sdk.reactive.factory.MessageFactory;
 
 public abstract class MessagesStream {
@@ -32,6 +32,20 @@ public abstract class MessagesStream {
 	 */
 
 	public abstract void setMessageFactory(MessageFactory mFactory);
+
+	/**
+	 * Get a message that has been received.
+	 * @return result, a protobuf Message
+	 */
+	public abstract Future<Message> receive();
+
+	/**
+	 * Get a message that has been received. If the timeout is expired, throws
+	 * TimeoutException.
+	 * @param timeout time to wait for a message.
+	 * @return result, a protobuf Message
+	 */
+	public abstract Future<Message> receive(long timeout) throws TimeoutException;
 
 	/**
 	 * close the Stream.

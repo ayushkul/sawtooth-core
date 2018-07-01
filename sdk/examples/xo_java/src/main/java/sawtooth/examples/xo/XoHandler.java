@@ -16,11 +16,10 @@ package sawtooth.examples.xo;
 
 
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.apache.commons.lang3.StringUtils;
 
-import sawtooth.sdk.processor.State;
+import sawtooth.sdk.processor.State0MQImpl;
 import sawtooth.sdk.processor.TransactionHandler;
 import sawtooth.sdk.processor.Utils;
 import sawtooth.sdk.processor.exceptions.InternalError;
@@ -101,7 +100,7 @@ public class XoHandler implements TransactionHandler {
   }
 
   @Override
-  public void apply(TpProcessRequest transactionRequest, State stateStore)
+  public void apply(TpProcessRequest transactionRequest, State0MQImpl stateStore)
       throws InvalidTransactionException, InternalError {
     TransactionData transactionData = getUnpackedTransaction(transactionRequest);
 
@@ -213,7 +212,7 @@ public class XoHandler implements TransactionHandler {
   /**
    * Helper function to store state data.
    */
-  private void storeGameData(String address, GameData gameData, String stateEntry, State stateStore)
+  private void storeGameData(String address, GameData gameData, String stateEntry, State0MQImpl stateStore)
       throws InternalError, InvalidTransactionException {
     String gameDataCsv = String.format("%s,%s,%s,%s,%s",
         gameData.gameName, gameData.board, gameData.state, gameData.playerOne, gameData.playerTwo);

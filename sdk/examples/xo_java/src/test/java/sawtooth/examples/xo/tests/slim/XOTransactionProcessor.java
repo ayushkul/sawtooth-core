@@ -12,8 +12,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import sawtooth.sdk.messaging.Future;
-import sawtooth.sdk.messaging.Stream;
-import sawtooth.sdk.processor.State;
+import sawtooth.sdk.messaging.Stream0MQImpl;
+import sawtooth.sdk.processor.State0MQImpl;
 import sawtooth.sdk.processor.TransactionHandler;
 import sawtooth.sdk.processor.exceptions.InternalError;
 import sawtooth.sdk.processor.exceptions.InvalidTransactionException;
@@ -31,7 +31,7 @@ public class XOTransactionProcessor extends AbstractVerticle {
 	public final static Logger LOGGER = LoggerFactory.getLogger(XOTransactionProcessor.class);
 	public final static String MQBINDADDRESSCONFIGNAME = "tpmqadd";
 
-	private final ThreadLocal<Stream> stream = new ThreadLocal<Stream>();
+	private final ThreadLocal<Stream0MQImpl> stream = new ThreadLocal<Stream0MQImpl>();
 	private final ThreadLocal<ArrayList<TransactionHandler>> handlers = new ThreadLocal<ArrayList<TransactionHandler>>();
 	private final ThreadLocal<Message> currentMessage = new ThreadLocal<Message>();
 	private final ThreadLocal<Boolean> registered = new ThreadLocal<Boolean>();
@@ -89,11 +89,11 @@ public class XOTransactionProcessor extends AbstractVerticle {
 	 * @param stream The Stream to use to send back responses.
 	 * @param handler The handler that should be used to process the message.
 	 */
-	private void process(Message message, Stream stream, TransactionHandler handler) {
+	private void process(Message message, Stream0MQImpl stream, TransactionHandler handler) {
 		LOGGER.debug("process() " + handler.transactionFamilyName());
 		try {
 			TpProcessRequest transactionRequest = TpProcessRequest.parseFrom(message.getContent());
-			State state = new State(stream, transactionRequest.getContextId());
+			State0MQImpl state = new State0MQImpl(stream, transactionRequest.getContextId());
 
 			TpProcessResponse.Builder builder = TpProcessResponse.newBuilder();
 			try {
@@ -149,7 +149,7 @@ public class XOTransactionProcessor extends AbstractVerticle {
 		});
 		vertx.eventBus().send(this.address.get(),"LALA");
 		LOGGER.debug(Thread.currentThread().getName() + " -- start() for URI " + this.address.get());
-		this.stream.set(new Stream(this.address.get()));
+		this.stream.set(new Stream0MQImpl(this.address.get()));
 		this.handlers.set(new ArrayList<TransactionHandler>());
 		this.currentMessage.set(null);
 		while (true) {

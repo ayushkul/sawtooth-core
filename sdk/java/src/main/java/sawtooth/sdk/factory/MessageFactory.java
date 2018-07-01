@@ -68,9 +68,17 @@ public class MessageFactory {
 		MESSAGEDIGESTER = MessageDigest.getInstance(digesterAlgo);
 		this.familyName = familyName;
 		this.familyVersion = familyVersion;
-		this.signerPrivateKey = privateKey == null ? Signing.generatePrivateKey(new SecureRandom(
-				ByteBuffer.allocate(Long.BYTES).putLong(Calendar.getInstance().getTimeInMillis()).array()))
-				: privateKey;
+		if (privateKey == null) {
+			LOGGER.warn("Private Key null, creating a new one...");
+			this.signerPrivateKey = Signing.generatePrivateKey(new SecureRandom(
+					ByteBuffer.allocate(Long.BYTES).putLong(Calendar.getInstance().getTimeInMillis()).array()));
+			LOGGER.warn("Created with encryption " + this.signerPrivateKey.getEncryptionType().toString()
+					+ " and Key Crypter " + this.signerPrivateKey.getKeyCrypter().toString());
+		}
+		else {
+			this.signerPrivateKey = privateKey;
+		}
+
 		List<String> binNameSpaces = new ArrayList<String>();
 		for (String eachNS : nameSpaces) {
 			binNameSpaces
@@ -138,7 +146,7 @@ public class MessageFactory {
 
 		return reqBuilder.build();
 	}
-	
+
 	public TpProcessRequest createTpProcessRequest(String contextId, StringBuffer payload, List<String> inputs,
 			List<String> outputs, List<String> dependencies, ECKey batcherPubKey) throws NoSuchAlgorithmException {
 		TpProcessRequest.Builder reqBuilder = TpProcessRequest.newBuilder();

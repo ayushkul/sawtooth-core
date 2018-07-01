@@ -32,6 +32,7 @@ import sawtooth.sdk.protobuf.PingResponse;
 import sawtooth.sdk.protobuf.TpEventAddRequest;
 import sawtooth.sdk.protobuf.TpEventAddResponse;
 import sawtooth.sdk.protobuf.TpProcessRequest;
+import sawtooth.sdk.protobuf.TpProcessResponse;
 import sawtooth.sdk.protobuf.TpRegisterRequest;
 import sawtooth.sdk.protobuf.TpRegisterResponse;
 import sawtooth.sdk.protobuf.TpStateDeleteRequest;
@@ -41,6 +42,7 @@ import sawtooth.sdk.protobuf.TpStateGetRequest;
 import sawtooth.sdk.protobuf.TpStateGetResponse;
 import sawtooth.sdk.protobuf.TpStateSetRequest;
 import sawtooth.sdk.protobuf.TpStateSetResponse;
+import sawtooth.sdk.protobuf.TpUnregisterRequest;
 import sawtooth.sdk.protobuf.Transaction;
 import sawtooth.sdk.protobuf.TransactionHeader;
 import sawtooth.sdk.reactive.client.Signing;
@@ -158,6 +160,18 @@ public class MessageFactory {
 		return reqBuilder.build();
 	}
 
+	public Message getUnregisterRequest() {
+		Message newMessage = Message.newBuilder().setContent(createTpUnregisterRequest().toByteString())
+				.setCorrelationId(generateId()).setMessageType(MessageType.TP_UNREGISTER_REQUEST).build();
+
+		return newMessage;
+	}
+
+	private TpUnregisterRequest createTpUnregisterRequest() {
+		TpUnregisterRequest request = TpUnregisterRequest.newBuilder().build();
+		return request;
+	}
+
 	public Message getPingRequest() {
 		Message newMessage = Message.newBuilder().setContent(createPingRequest().toByteString())
 				.setCorrelationId(this.generateId()).setMessageType(MessageType.PING_REQUEST).build();
@@ -195,6 +209,20 @@ public class MessageFactory {
 
 		return reqBuilder.build();
 	}
+	
+	public Message getProcessResponse(String correlationId, TpProcessResponse	originalResponse) {
+		Message newMessage = Message.newBuilder().setContent(originalResponse.toByteString())
+				.setCorrelationId(correlationId).setMessageType(MessageType.TP_PROCESS_RESPONSE).build();
+
+		return newMessage;
+	}
+	
+	private TpProcessResponse parseTpProcessResponse(Message message) throws InvalidProtocolBufferException{
+		TpProcessResponse responseMessage = TpProcessResponse.parseFrom(message.getContent());
+
+		return responseMessage;
+	}
+
 
 	private TpStateGetResponse createTpStateGetResponse(List<TpStateEntry> entries) {
 		Optional<TpStateEntry> wrongAddressEntry = entries.stream()
@@ -210,6 +238,13 @@ public class MessageFactory {
 
 	}
 
+	public Message getStateRequest(List<String> addresses) {
+		Message newMessage = Message.newBuilder().setContent(createTpStateGetRequest(addresses).toByteString())
+				.setCorrelationId(generateId()).setMessageType(MessageType.TP_STATE_GET_REQUEST).build();
+
+		return newMessage;
+	}
+
 	private TpStateGetRequest createTpStateGetRequest(List<String> addresses) {
 		Optional<String> wrongAddress = addresses.stream().filter(str -> !isValidMerkleAddress(str)).findFirst();
 		if (wrongAddress.isPresent()) {
@@ -223,22 +258,39 @@ public class MessageFactory {
 
 	}
 
-	private TpStateSetRequest createTpStateSetRequest(Map<String, TpStateEntry> addressDataMap) {
-		Optional<String> wrongAddress = addressDataMap.keySet().stream().filter(str -> !isValidMerkleAddress(str))
-				.findFirst();
+	public Message getSetStateRequest(String contextId, List<java.util.Map.Entry<String, ByteString>> addressDataMap) {
+		Message newMessage = Message.newBuilder()
+				.setContent(createTpStateSetRequest(contextId, addressDataMap).toByteString())
+				.setCorrelationId(generateId()).setMessageType(MessageType.TP_STATE_SET_REQUEST).build();
+
+		return newMessage;
+	}
+
+	private TpStateSetRequest createTpStateSetRequest(String contextId,
+			List<java.util.Map.Entry<String, ByteString>> addressDataMap) {
+
+		ArrayList<TpStateEntry> entryArrayList = new ArrayList<TpStateEntry>();
+		for (Map.Entry<String, ByteString> entry : addressDataMap) {
+			TpStateEntry ourTpStateEntry = TpStateEntry.newBuilder().setAddress(entry.getKey())
+					.setData(entry.getValue()).build();
+			entryArrayList.add(ourTpStateEntry);
+		}
+
+		Optional<TpStateEntry> wrongAddress = entryArrayList.stream()
+				.filter(str -> !isValidMerkleAddress(str.getAddress())).findFirst();
 		if (wrongAddress.isPresent()) {
-			LOGGER.error("Invalid Address " + wrongAddress.get());
+			LOGGER.error("Invalid Address " + wrongAddress.get().getAddress());
 			return null;
 		}
 
-		TpStateSetRequest.Builder reqBuilder = TpStateSetRequest.newBuilder();
+		TpStateSetRequest.Builder reqBuilder = TpStateSetRequest.newBuilder().setContextId(contextId);
 
 		TpStateEntry.Builder stateBuilder = TpStateEntry.newBuilder();
 
-		reqBuilder.addAllEntries(addressDataMap.entrySet().stream().sequential().map(es -> {
+		reqBuilder.addAllEntries(entryArrayList.stream().sequential().map(es -> {
 			stateBuilder.clear();
-			stateBuilder.setAddress(es.getKey());
-			stateBuilder.setData(es.getValue().getData());
+			stateBuilder.setAddress(es.getAddress());
+			stateBuilder.setData(es.getData());
 			return stateBuilder.build();
 		}).collect(Collectors.toList()));
 
@@ -246,16 +298,10 @@ public class MessageFactory {
 
 	}
 
-	private TpStateSetResponse createTpStateSetResponse(List<String> addresses) {
-		Optional<String> wrongAddress = addresses.stream().filter(str -> !isValidMerkleAddress(str)).findFirst();
-		if (wrongAddress.isPresent()) {
-			LOGGER.error("Invalid Address " + wrongAddress.get());
-			return null;
-		}
+	public TpStateSetResponse createTpStateSetResponse(Message respMesg) throws InvalidProtocolBufferException {
+		TpStateSetResponse parsedExp = TpStateSetResponse.parseFrom(respMesg.getContent());
 
-		TpStateSetResponse.Builder reqBuilder = TpStateSetResponse.newBuilder();
-		reqBuilder.addAllAddresses(addresses);
-		return reqBuilder.build();
+		return parsedExp;
 
 	}
 

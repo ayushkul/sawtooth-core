@@ -15,18 +15,41 @@
 package sawtooth.examples.xo;
 
 import sawtooth.examples.xo.XoHandler;
+import sawtooth.sdk.processor.TransactionHandler;
 import sawtooth.sdk.processor.TransactionProcessor;
 
-public class XoTransactionProcessor {
-  /**
-   * the method that runs a Thread with a TransactionProcessor in it.
-   */
-  public static void main(String[] args) {
-    TransactionProcessor transactionProcessor = new TransactionProcessor(args[0]);
-    transactionProcessor.addHandler(new XoHandler());
-    Thread thread = new Thread(transactionProcessor);
-    thread.start();
-    
-    
-  }
+public class XoTransactionProcessor implements TransactionProcessor {
+	/**
+	 * the method that runs a Thread with a TransactionProcessor in it.
+	 */
+	public static void main(String[] args) {
+		this.addHandler(new XoHandler());
+		Thread thread = new Thread(transactionProcessor);
+		thread.start();
+
+	}
+
+	@Override
+	public void addHandler(TransactionHandler handler) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void shutdown() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public String getTransactionProcessorId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

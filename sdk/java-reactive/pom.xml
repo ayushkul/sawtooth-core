@@ -10,8 +10,8 @@
 		<reactor-grpc-version>0.8.2</reactor-grpc-version>
 		<grpc-version>1.13.1</grpc-version>
 		<protobuf-version>3.6.0</protobuf-version>
-		<jackson.version>2.9.1</jackson.version>
-		<jersey.version>2.27</jersey.version>
+<!-- 		<jackson.version>2.9.1</jackson.version> -->
+<!-- 		<jersey.version>2.27</jersey.version> -->
 		<apachelog-version>2.11.0</apachelog-version>
 		<swagger-version>2.0.2</swagger-version>
 		<sw_rest_url>http://localhost:8080</sw_rest_url>
@@ -53,11 +53,17 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.7.0</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<release>10</release>
 					<encoding>UTF-8</encoding>
 					<optimize>true</optimize>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.ow2.asm</groupId>
+						<artifactId>asm</artifactId>
+						<version>6.2</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.xolstice.maven.plugins</groupId>

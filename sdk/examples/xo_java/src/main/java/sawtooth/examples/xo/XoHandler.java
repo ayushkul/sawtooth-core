@@ -19,6 +19,7 @@ import com.google.protobuf.ByteString;
 
 import org.apache.commons.lang3.StringUtils;
 
+import sawtooth.sdk.processor.SawtoothState;
 import sawtooth.sdk.processor.State0MQImpl;
 import sawtooth.sdk.processor.TransactionHandler;
 import sawtooth.sdk.processor.Utils;
@@ -100,7 +101,7 @@ public class XoHandler implements TransactionHandler {
   }
 
   @Override
-  public void apply(TpProcessRequest transactionRequest, State0MQImpl stateStore)
+  public void apply(TpProcessRequest transactionRequest, SawtoothState stateStore)
       throws InvalidTransactionException, InternalError {
     TransactionData transactionData = getUnpackedTransaction(transactionRequest);
 

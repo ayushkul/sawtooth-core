@@ -1,12 +1,14 @@
 package sawtooth.sdk.messaging;
 
+import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Future;
+import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.TimeoutException;
 
 import sawtooth.sdk.protobuf.Message;
 import sawtooth.sdk.reactive.factory.MessageFactory;
 
-public abstract class MessagesStream {
+public abstract class MessagesStream extends SubmissionPublisher<Message> {
 
 	/**
 	 * Send a message and return a Future that will later have the Bytestring.

@@ -3,30 +3,42 @@ package sawtooth.sdk.messaging;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Flow.Subscription;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SubmissionPublisher;
+import java.util.concurrent.TimeoutException;
 
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zeromq.ZContext;
 import org.zeromq.ZFrame;
 import org.zeromq.ZLoop;
 import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
 
-import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import sawtooth.sdk.protobuf.Message;
+import sawtooth.sdk.reactive.factory.MessageFactory;
 
-public class ReactorStream implements Runnable {
+public class ReactorStream extends MessagesStream implements Runnable {
+
+	private final static Logger LOGGER = LoggerFactory.getLogger(ReactorStream.class);
+
 	private String url;
+	private String streamIdentity;
 	private ZMQ.Socket socket;
-	private ConcurrentHashMap<String, Future> futures;
-	private LinkedBlockingQueue<Message> receiveQueue;
+	private SubmissionPublisher<Message> msgPublisher = new SubmissionPublisher<>();
 	private ZContext context;
 
 	public ReactorStream(String address) {
-		this.receiveQueue = new LinkedBlockingQueue<Message>();
 		this.url = address;
+		streamIdentity = (this.getClass().getSimpleName() + ":" + address + ":" + UUID.randomUUID().toString());
+		LOGGER.debug("Creating ");
 
 	}
 
@@ -38,18 +50,19 @@ public class ReactorStream implements Runnable {
 		final ZMQ.Socket monitor = this.context.createSocket(ZMQ.PAIR);
 		monitor.connect("inproc://monitor.s");
 		ZLoop eventLoop = new ZLoop(this.context);
+		socket.setIdentity(getStreamIdentity().getBytes());
+		socket.connect(url);
 		ZMQ.PollItem pollItem = new ZMQ.PollItem(socket, ZMQ.Poller.POLLIN);
-		eventLoop.addPoller(pollItem, new Receiver(futures, receiveQueue), new Object());
+		eventLoop.addPoller(pollItem, new Receiver(msgPublisher), new Object());
 		eventLoop.start();
 	}
 
 	private class Receiver implements ZLoop.IZLoopHandler {
-		private ConcurrentHashMap<String, Future> futures;
-		private LinkedBlockingQueue<Message> receiveQueue;
 
-		Receiver(ConcurrentHashMap<String, Future> futures, LinkedBlockingQueue<Message> receiveQueue) {
-			this.futures = futures;
-			this.receiveQueue = receiveQueue;
+		private SubmissionPublisher<Message> receiverPublisher;
+
+		public Receiver(SubmissionPublisher<Message> internalMesgPub) {
+			this.receiverPublisher = internalMesgPub;
 		}
 
 		@Override
@@ -58,35 +71,67 @@ public class ReactorStream implements Runnable {
 			Iterator<ZFrame> multiPartMessage = msg.iterator();
 
 			ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-			while (multiPartMessage.hasNext()) {
-				ZFrame frame = multiPartMessage.next();
+			multiPartMessage.forEachRemaining((partial)->{
 				try {
-					byteArrayOutputStream.write(frame.getData());
+					byteArrayOutputStream.write(partial.getData());
 				}
-				catch (IOException ioe) {
-					ioe.printStackTrace();
+				catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			}
+			});
+			
 			try {
 				Message message = Message.parseFrom(byteArrayOutputStream.toByteArray());
-				if (this.futures.containsKey(message.getCorrelationId())) {
-					Future<ByteString> future = this.futures.get(message.getCorrelationId());
-					this.futures.put(message.getCorrelationId(), future);
-				}
-				else {
-					this.receiveQueue.put(message);
-				}
+				this.receiverPublisher.submit(message);
 			}
-			catch (InterruptedException ie) {
-				ie.printStackTrace();
+			catch (InvalidProtocolBufferException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			catch (InvalidProtocolBufferException ipe) {
-				ipe.printStackTrace();
-			}
-			
 
 			return 0;
 		}
+	}
+
+	@Override
+	public Future<Message> send(Message payload) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void sendBack(String correlationId, Message payload) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setMessageFactory(MessageFactory mFactory) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Future<Message> receive() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Future<Message> receive(long timeout) throws TimeoutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+
+	}
+
+	public String getStreamIdentity() {
+		return streamIdentity;
 	}
 
 }

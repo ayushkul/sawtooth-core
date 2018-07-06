@@ -12,13 +12,13 @@
  limitations under the License.
 ------------------------------------------------------------------------------*/
 
-package sawtooth.sdk.processor;
+package sawtooth.sdk.utils;
 
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class Utils {
+public class FormattingUtils {
 
 	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 	private static final MessageDigest messageDigest;

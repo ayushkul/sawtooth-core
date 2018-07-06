@@ -20,6 +20,7 @@ import sawtooth.sdk.messaging.Stream0MQImpl;
 import sawtooth.sdk.processor.exceptions.InternalError;
 import sawtooth.sdk.processor.exceptions.InvalidTransactionException;
 import sawtooth.sdk.processor.exceptions.ValidatorConnectionError;
+import sawtooth.sdk.protobuf.Batch;
 import sawtooth.sdk.protobuf.BatchList;
 import sawtooth.sdk.protobuf.Message;
 import sawtooth.sdk.protobuf.PingResponse;
@@ -128,10 +129,11 @@ public class TransactionProcessor0MQImpl implements TransactionProcessor {
 		try {
 			TpProcessRequest transactionRequest = TpProcessRequest.parseFrom(message.getContent());
 			SawtoothState state = new State0MQImpl(stream, transactionRequest.getContextId());
-			BatchList batchToProcess = mesgFact.createBatch(Arrays.asList(message));
+			Batch batchToProcess = mesgFact.createBatch(Arrays.asList(message));
 			TpProcessResponse.Builder builder = TpProcessResponse.newBuilder();
+
 			try {
-				handler.apply(batchToProcess, state);
+				handler.apply(BatchList.newBuilder().addBatches(batchToProcess).build(), state);
 				builder.setStatus(TpProcessResponse.Status.OK);
 			}
 			catch (InvalidTransactionException ite) {
@@ -150,8 +152,9 @@ public class TransactionProcessor0MQImpl implements TransactionProcessor {
 					builder.setExtendedData(ByteString.copyFrom(ie.getExtendedData()));
 				}
 			}
-			
-			stream.sendBack(message.getCorrelationId(), mesgFact.getProcessResponse(message.getCorrelationId(), builder.build()));
+
+			stream.sendBack(message.getCorrelationId(),
+					mesgFact.getProcessResponse(message.getCorrelationId(), builder.build()));
 
 		}
 		catch (InvalidProtocolBufferException ipbe) {
@@ -200,7 +203,8 @@ public class TransactionProcessor0MQImpl implements TransactionProcessor {
 				if (this.currentMessage != null) {
 					if (this.currentMessage.getMessageType() == Message.MessageType.PING_REQUEST) {
 						LOGGER.info("Received Ping Message.");
-						this.stream.sendBack(this.currentMessage.getCorrelationId(), mesgFact.getPingResponse(this.currentMessage.getCorrelationId()));
+						this.stream.sendBack(this.currentMessage.getCorrelationId(),
+								mesgFact.getPingResponse(this.currentMessage.getCorrelationId()));
 						this.currentMessage = null;
 					}
 					else if (this.currentMessage.getMessageType() == Message.MessageType.TP_PROCESS_REQUEST) {
@@ -222,7 +226,7 @@ public class TransactionProcessor0MQImpl implements TransactionProcessor {
 					this.registered = false;
 					for (int i = 0; i < this.handlers.size(); i++) {
 						TransactionHandler handler = this.handlers.get(i);
-						
+
 						try {
 							Future<Message> fut = this.stream.send(handler.getMessageFactory().getRegisterRequest());
 							fut.get();
@@ -235,7 +239,7 @@ public class TransactionProcessor0MQImpl implements TransactionProcessor {
 							LOGGER.error(e.toString());
 							e.printStackTrace();
 						}
-						
+
 					}
 				}
 			}

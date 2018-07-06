@@ -59,7 +59,7 @@ public class RESTFactory {
 		RESTTransaction manufact = new RESTTransaction();
 		manufact.setHeader(fromTransactionHeader(TransactionHeader.parseFrom(protbufTransaction.getHeader())));
 		manufact.setHeaderSignature(protbufTransaction.getHeaderSignature());
-		manufact.setPayload(protbufTransaction.getPayload().toString(StandardCharsets.UTF_8));
+		manufact.setPayload(protbufTransaction.getPayload().toByteArray());
 		return manufact;
 	}
 

@@ -17,7 +17,7 @@ import sawtooth.sdk.processor.exceptions.InvalidTransactionException;
  * <a href="https://github.com/CarvalhoLeonardo">GitHub</a>
  * <a href="https://br.linkedin.com/in/leonardocarvalho">LinkedIn</a>
  * 
- * 	Interface that defines the Client's Sawtooth State handling
+ * Interface that defines the Client's Sawtooth State handling
  *
  */
 public interface SawtoothState {
@@ -42,4 +42,23 @@ public interface SawtoothState {
 	 */
 	public Collection<String> setState(List<java.util.Map.Entry<String, ByteString>> addressValuePairs)
 			throws InternalError, InvalidTransactionException;
+
+	/**
+	 * 
+	 * Add a new event to the execution result for this transaction.
+	 * 
+	 * 
+	 * @param eventToAdd This is used to subscribe to events. It should be globally unique
+	 * and describe what, in general, has occured.
+	 * @param attributes Additional information about the event that is transparent to the
+	 * validator. Attributes can be used by subscribers to filter the type of events they
+	 * receive.
+	 * 
+	 * @param extraData Additional information about the event that is opaque to the
+	 * validator.
+	 * 
+	 * @return Response from the Validator
+	 */
+	public ByteString AddEvent(String eventType, Map<String, String> attributes, ByteString extraData)
+			throws InternalError, InvalidTransactionException,InvalidProtocolBufferException;
 }

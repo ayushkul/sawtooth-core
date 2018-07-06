@@ -21,6 +21,7 @@ import sawtooth.sdk.messaging.MessagesStream;
 import sawtooth.sdk.processor.exceptions.InternalError;
 import sawtooth.sdk.processor.exceptions.InvalidTransactionException;
 import sawtooth.sdk.processor.exceptions.ValidatorConnectionError;
+import sawtooth.sdk.protobuf.Event;
 import sawtooth.sdk.protobuf.Message;
 import sawtooth.sdk.protobuf.TpStateEntry;
 import sawtooth.sdk.protobuf.TpStateGetRequest;
@@ -28,6 +29,7 @@ import sawtooth.sdk.protobuf.TpStateGetResponse;
 import sawtooth.sdk.protobuf.TpStateSetRequest;
 import sawtooth.sdk.protobuf.TpStateSetResponse;
 import sawtooth.sdk.protobuf.Message.MessageType;
+import sawtooth.sdk.protobuf.TpEventAddResponse;
 import sawtooth.sdk.reactive.factory.MessageFactory;
 
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,5 +144,58 @@ public class State0MQImpl implements SawtoothState{
 
 		return addressesThatWereSet;
 	}
+
+	@Override
+	public ByteString AddEvent(String eventType, Map<String, String> attributes, ByteString extraData)
+			throws InternalError, InvalidTransactionException, InvalidProtocolBufferException {
+		final Event.Attribute.Builder	attBuilder =  Event.Attribute.newBuilder();
+		Future<Message> future = stream.send(mesgFact.getEventAddRequest(this.contextId,eventType, attributes.entrySet().stream().map( es -> {
+			return attBuilder.setKey(es.getKey()).setValue(es.getValue()).build(); 
+		}).collect(Collectors.toList()),extraData));
+		
+		Message setResponse = null;
+		try {
+			setResponse = future.get(TIME_OUT,TimeUnit.SECONDS);
+		}
+		catch (InterruptedException iee) {
+			throw new InternalError(iee.toString());
+
+		}
+		catch (Exception e) {
+			throw new InternalError(e.toString());
+		}
+		
+		ByteString response = null;
+		
+		if (setResponse != null) {
+			if (! setResponse.getMessageType().equals(MessageType.TP_EVENT_ADD_RESPONSE)) {
+				LOGGER.info("Not a response , got "+setResponse.getMessageType().name()+" instead.");
+			}
+			TpEventAddResponse responsePayload = mesgFact.createTpEventAddResponse(setResponse);
+			
+			switch (responsePayload.getStatus()){
+			case ERROR:
+				LOGGER.error(responsePayload.toString());
+				throw new InvalidTransactionException("Error received from the Validator for message with id "+setResponse.getCorrelationId());
+			case STATUS_UNSET:
+				LOGGER.error(responsePayload.toString());
+				throw new InvalidTransactionException("Status UNSET for message with id "+setResponse.getCorrelationId());
+			case UNRECOGNIZED:
+				LOGGER.error(responsePayload.toString());
+				throw new InvalidTransactionException("Event Type "+eventType+" UNRECOGNIZED for message with id "+setResponse.getCorrelationId());
+			case OK:
+			default:
+				response = responsePayload.toByteString();
+				break;
+			
+			}
+		} else {
+			throw new InternalError("State Error, no result found for set request !");
+		}
+		
+		return response;
+	}
+
+	
 
 }

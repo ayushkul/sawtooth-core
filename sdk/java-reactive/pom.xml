@@ -10,11 +10,11 @@
 		<reactor-grpc-version>0.8.2</reactor-grpc-version>
 		<grpc-version>1.13.1</grpc-version>
 		<protobuf-version>3.6.0</protobuf-version>
-<!-- 		<jackson.version>2.9.1</jackson.version> -->
-<!-- 		<jersey.version>2.27</jersey.version> -->
+		<jackson.version>2.9.1</jackson.version>
+		<jersey.version>2.27</jersey.version>
 		<apachelog-version>2.11.0</apachelog-version>
 		<swagger-version>2.0.2</swagger-version>
-		<sw_rest_url>http://localhost:8080</sw_rest_url>
+		<sw_rest_url>http://192.168.1.101:8080</sw_rest_url>
 		<sw_validator_url>http://localhost:4004</sw_validator_url>
 	</properties>
 	<build>
@@ -105,9 +105,9 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>io.swagger</groupId>
-				<artifactId>swagger-codegen-maven-plugin</artifactId>
-				<version>3.0.0-rc1</version>
+				<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>3.0.3</version>
 				<executions>
 					<execution>
 						<goals>
@@ -119,18 +119,27 @@
 							<addCompileSourceRoot>true</addCompileSourceRoot>
 							<output>target/generated-sources/swagger</output>
 							<modelPackage>sawtooth.sdk.reactive.rest.model</modelPackage>
-							<apiPackage>sawtooth.sdk.reactive.rest.api</apiPackage>
-							<invokerPackage>sawtooth.sdk.reactive.rest.invoker</invokerPackage>
 							<modelNamePrefix>REST</modelNamePrefix>
-							<generateApiDocumentation>true</generateApiDocumentation>
+							<prependFormOrBodyParameters>true</prependFormOrBodyParameters>
+							<generateApis>false</generateApis>
+							<generateModelDocumentation>true</generateModelDocumentation>
+							<generateSupportingFiles>false</generateSupportingFiles>
 							<!-- java -jar ${m2_repo}/org/openapitools/openapi-generator-cli/3.0.3/openapi-generator-cli-3.0.3.jar 
-								config-help -l java -->
+								config-help -l java 
+												<groupId>org.openapitools</groupId>
+				<artifactId>openapi-generator-maven-plugin</artifactId>
+				<version>3.0.3</version>
+								
+								<groupId>io.swagger</groupId>
+				<artifactId>swagger-codegen-maven-plugin</artifactId>
+				<version>3.0.0-rc1</version>
+								-->
 							<configOptions>
 								<library>jersey2</library>
 								<dateLibrary>java8</dateLibrary>
-								<useGenericResponse>true</useGenericResponse>
 								<hideGenerationTimestamp>true</hideGenerationTimestamp>
 								<serializableModel>true</serializableModel>
+								<java8>true</java8>
 							</configOptions>
 						</configuration>
 					</execution>
@@ -250,6 +259,22 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-moxy</artifactId>
+			<version>${jersey.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.activation</groupId>
+			<artifactId>javax.activation</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+
+		<!-- dependency> <groupId>org.glassfish.jersey.ext.cdi</groupId> <artifactId>jersey-weld2-se</artifactId> 
+			<version>${jersey.version}</version> </dependency -->
+
+
+		<dependency>
 			<groupId>org.bitcoinj</groupId>
 			<artifactId>bitcoinj-core</artifactId>
 			<version>0.14.7</version>
@@ -327,6 +352,13 @@
 			<version>1.5.20</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>co.nstant.in</groupId>
+			<artifactId>cbor</artifactId>
+			<version>0.8</version>
+		</dependency>
+
 
 	</dependencies>
 </project>

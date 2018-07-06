@@ -1,6 +1,5 @@
 package sawtooth.sdk.messaging;
 
-import java.util.concurrent.Flow.Subscriber;
 import java.util.concurrent.Future;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.TimeoutException;

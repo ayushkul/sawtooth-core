@@ -58,6 +58,10 @@ public class MessageFactory {
 
 	ECKey signerPrivateKey;
 
+	public String getPublicKeyString() {
+		return signerPrivateKey.getPublicKeyAsHex();
+	}
+
 	public MessageFactory(String familyName, String familyVersion, ECKey privateKey, String... nameSpaces)
 			throws NoSuchAlgorithmException {
 		this(familyName, "SHA-512", familyVersion, privateKey, nameSpaces);
@@ -73,7 +77,7 @@ public class MessageFactory {
 			this.signerPrivateKey = Signing.generatePrivateKey(new SecureRandom(
 					ByteBuffer.allocate(Long.BYTES).putLong(Calendar.getInstance().getTimeInMillis()).array()));
 			LOGGER.warn("Created with encryption " + this.signerPrivateKey.getEncryptionType().toString()
-					+ " and Key Crypter " + this.signerPrivateKey.getKeyCrypter().toString());
+					+ " and Key Crypter " + this.signerPrivateKey.getKeyCrypter());
 		}
 		else {
 			this.signerPrivateKey = privateKey;
@@ -89,13 +93,12 @@ public class MessageFactory {
 	}
 
 	public TransactionHeader createTransactionHeader(StringBuffer payload, List<String> inputs, List<String> outputs,
-			List<String> dependencies, boolean needsNonce, ECKey batcherPubKey) throws NoSuchAlgorithmException {
+			List<String> dependencies, boolean needsNonce, String batcherPubKey) throws NoSuchAlgorithmException {
 		TransactionHeader.Builder thBuilder = TransactionHeader.newBuilder();
 		thBuilder.setFamilyName(familyName);
 		thBuilder.setFamilyVersion(familyVersion);
 		thBuilder.setSignerPublicKey(Signing.getPublicKey(signerPrivateKey));
-		thBuilder.setBatcherPublicKey(
-				batcherPubKey != null ? batcherPubKey.getPublicKeyAsHex() : thBuilder.getSignerPublicKey());
+		thBuilder.setBatcherPublicKey(batcherPubKey != null ? batcherPubKey : thBuilder.getSignerPublicKey());
 		thBuilder.setPayloadSha512(new String(
 				MESSAGEDIGESTER.digest(payload.toString().getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
 		if (needsNonce) {
@@ -196,8 +199,18 @@ public class MessageFactory {
 		return pong;
 	}
 
+	public Message getProcessRequest(String contextId, StringBuffer payload, List<String> inputs, List<String> outputs,
+			List<String> dependencies, String batcherPubKey) throws NoSuchAlgorithmException {
+		Message newMessage = Message.newBuilder()
+				.setContent(createTpProcessRequest(contextId, payload, inputs, outputs, dependencies, batcherPubKey)
+						.toByteString())
+				.setCorrelationId(generateId()).setMessageType(MessageType.TP_PROCESS_REQUEST).build();
+
+		return newMessage;
+	}
+
 	private TpProcessRequest createTpProcessRequest(String contextId, StringBuffer payload, List<String> inputs,
-			List<String> outputs, List<String> dependencies, ECKey batcherPubKey) throws NoSuchAlgorithmException {
+			List<String> outputs, List<String> dependencies, String batcherPubKey) throws NoSuchAlgorithmException {
 		TpProcessRequest.Builder reqBuilder = TpProcessRequest.newBuilder();
 
 		reqBuilder.setContextId(contextId);
@@ -209,20 +222,19 @@ public class MessageFactory {
 
 		return reqBuilder.build();
 	}
-	
-	public Message getProcessResponse(String correlationId, TpProcessResponse	originalResponse) {
+
+	public Message getProcessResponse(String correlationId, TpProcessResponse originalResponse) {
 		Message newMessage = Message.newBuilder().setContent(originalResponse.toByteString())
 				.setCorrelationId(correlationId).setMessageType(MessageType.TP_PROCESS_RESPONSE).build();
 
 		return newMessage;
 	}
-	
-	private TpProcessResponse parseTpProcessResponse(Message message) throws InvalidProtocolBufferException{
+
+	private TpProcessResponse parseTpProcessResponse(Message message) throws InvalidProtocolBufferException {
 		TpProcessResponse responseMessage = TpProcessResponse.parseFrom(message.getContent());
 
 		return responseMessage;
 	}
-
 
 	private TpStateGetResponse createTpStateGetResponse(List<TpStateEntry> entries) {
 		Optional<TpStateEntry> wrongAddressEntry = entries.stream()
@@ -331,6 +343,15 @@ public class MessageFactory {
 		return reqBuilder.build();
 	}
 
+	public Message getEventAddRequest(String contextId, String eventType, List<Event.Attribute> attributes,
+			ByteString data) {
+		Message newMessage = Message.newBuilder()
+				.setContent(createTpEventAddRequest(contextId, eventType, attributes, data).toByteString())
+				.setCorrelationId(generateId()).setMessageType(MessageType.TP_EVENT_ADD_REQUEST).build();
+
+		return newMessage;
+	}
+
 	private TpEventAddRequest createTpEventAddRequest(String contextId, String eventType,
 			List<Event.Attribute> attributes, ByteString data) {
 
@@ -347,12 +368,25 @@ public class MessageFactory {
 		return reqBuilder.build();
 	}
 
-	private TpEventAddResponse createTpEventAddResponse() {
-		return TpEventAddResponse.newBuilder().setStatus(TpEventAddResponse.Status.OK).build();
+	public TpEventAddResponse createTpEventAddResponse(Message respMesg) throws InvalidProtocolBufferException {
+		TpEventAddResponse parsedExp = TpEventAddResponse.parseFrom(respMesg.getContent());
+		return parsedExp;
+
 	}
 
+	/*
+	 * public Message getTransaction(StringBuffer payload, List<String> inputs,
+	 * List<String> outputs, List<String> dependencies) { Message newMessage =
+	 * Message.newBuilder() .setContent(createTransaction(contextId, eventType,
+	 * attributes, data).toByteString())
+	 * .setCorrelationId(generateId()).setMessageType(MessageType.TP_EVENT_ADD_REQUEST).
+	 * build();
+	 * 
+	 * return newMessage; }
+	 */
+
 	private Transaction createTransaction(StringBuffer payload, List<String> inputs, List<String> outputs,
-			List<String> dependencies, ECKey batcherPubKey) throws NoSuchAlgorithmException {
+			List<String> dependencies, String batcherPubKey) throws NoSuchAlgorithmException {
 		TransactionHeader header = createTransactionHeader(payload, inputs, outputs, dependencies, Boolean.TRUE,
 				batcherPubKey);
 		Transaction.Builder transactionBuilder = Transaction.newBuilder();
@@ -365,7 +399,7 @@ public class MessageFactory {
 		return transactionBuilder.build();
 	}
 
-	public BatchList createBatch(List<Message> transactions) {
+	public Batch createBatch(List<Message> transactions) {
 
 		List<Transaction> tempTransactionList = new ArrayList<Transaction>();
 		Transaction.Builder transactionBuilder = Transaction.newBuilder();
@@ -403,10 +437,8 @@ public class MessageFactory {
 		Batch.Builder batchBuilder = Batch.newBuilder();
 		Batch batch = batchBuilder.setHeader(batHeader.toByteString()).setHeaderSignature(headerSignature)
 				.addAllTransactions(tempTransactionList).build();
-		BatchList.Builder batchListBuilder = BatchList.newBuilder();
-		batchListBuilder.addBatches(batch);
-
-		return batchListBuilder.build();
+		
+		return batch;
 	}
 
 	/**

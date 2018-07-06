@@ -16,7 +16,7 @@
 swagger: '2.0'
 
 info:
-  version: "0.8.0"
+  version: "3.0.0"
   title: Sawtooth REST API
   description: |
     _This HTTP pragmatic REST API is built on top of Sawtooth's
@@ -213,17 +213,7 @@ paths:
         200:
           description: Successfully retrieved state data
           schema:
-            properties:
-              data:
-                type: array
-                items:
-                  $ref: "#/definitions/Entry"
-              head:
-                $ref: "#/definitions/Head"
-              link:
-                $ref: "#/definitions/Link"
-              paging:
-                $ref: "#/definitions/Paging"
+            $ref: "#/definitions/State"
         400:
           $ref: "#/responses/400BadRequest"
         500:
@@ -618,6 +608,19 @@ definitions:
         format: byte
         example: Zm9vOmJhcg==
 
+  State:
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Entry"
+      head:
+        $ref: "#/definitions/Head"
+      link:
+        $ref: "#/definitions/Link"
+      paging:
+          $ref: "#/definitions/Paging"
+
   TransactionHeader:
     properties:
       batcher_public_key:
@@ -662,7 +665,7 @@ definitions:
         example: 540a6803971d1880ec73a96cb97815a95d374cbad5d865925e5aa0432fcf1931539afe10310c122c5eaae15df61236079abbf4f258889359c4d175516934484a
       payload:
         type: string
-        format: binary
+        format: byte
 
   TransactionReceipt:
     properties:

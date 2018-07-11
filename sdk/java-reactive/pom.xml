@@ -3,362 +3,247 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>sawtooth</groupId>
-	<artifactId>reactive-sdk</artifactId>
+	<artifactId>java-reactive-sdk</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Sawtooth Reactive SDK</name>
+	<packaging>pom</packaging>
 	<properties>
 		<reactor-grpc-version>0.8.2</reactor-grpc-version>
 		<grpc-version>1.13.1</grpc-version>
 		<protobuf-version>3.6.0</protobuf-version>
-		<jackson.version>2.9.1</jackson.version>
-		<jersey.version>2.27</jersey.version>
+		<jackson-version>2.9.1</jackson-version>
+		<jersey-version>2.27</jersey-version>
 		<apachelog-version>2.11.0</apachelog-version>
 		<swagger-version>2.0.2</swagger-version>
-		<sw_rest_url>http://192.168.1.101:8080</sw_rest_url>
-		<sw_validator_url>http://localhost:4004</sw_validator_url>
+		<spongycastle-version>1.58.0.0</spongycastle-version>
+		<ERROR_LEVEL>INFO</ERROR_LEVEL>
+		<SAWTOOTH_LOG_LEVEL>INFO</SAWTOOTH_LOG_LEVEL>
 	</properties>
+
+	<modules>
+		<module>sdk-common</module>
+		<module>sdk-transaction-processor</module>
+		<module>sdk-rest-client</module>
+	</modules>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.salesforce.servicelibs</groupId>
+				<artifactId>reactor-grpc-stub</artifactId>
+				<version>${reactor-grpc-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.protobuf</groupId>
+				<artifactId>protobuf-java</artifactId>
+				<version>${protobuf-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-netty</artifactId>
+				<version>${grpc-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-protobuf</artifactId>
+				<version>${grpc-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.grpc</groupId>
+				<artifactId>grpc-stub</artifactId>
+				<version>${grpc-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.zeromq</groupId>
+				<artifactId>jeromq</artifactId>
+				<version>0.4.3</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>${jackson-version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.fasterxml.jackson.datatype</groupId>
+				<artifactId>jackson-datatype-jsr310</artifactId>
+				<version>${jackson-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish.jersey.core</groupId>
+				<artifactId>jersey-client</artifactId>
+				<version>${jersey-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-json-jackson</artifactId>
+				<version>${jersey-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-multipart</artifactId>
+				<version>${jersey-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish.jersey.inject</groupId>
+				<artifactId>jersey-cdi2-se</artifactId>
+				<version>${jersey-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.glassfish.jersey.media</groupId>
+				<artifactId>jersey-media-moxy</artifactId>
+				<version>${jersey-version}</version>
+			</dependency>
+
+			<!-- Java 10 adaptation for http://openjdk.java.net/jeps/320 -->
+			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>2.3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-runtime</artifactId>
+				<version>2.3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.activation</groupId>
+				<artifactId>javax.activation-api</artifactId>
+				<version>1.2.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.sun.activation</groupId>
+				<artifactId>javax.activation</artifactId>
+				<version>1.2.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.annotation</groupId>
+				<artifactId>javax.annotation-api</artifactId>
+				<version>1.3.2</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-core</artifactId>
+				<version>${swagger-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-jaxrs2</artifactId>
+				<version>${swagger-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-jaxrs2-servlet-initializer</artifactId>
+				<version>${swagger-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-models</artifactId>
+				<version>${swagger-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>${swagger-version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.swagger</groupId>
+				<artifactId>swagger-annotations</artifactId>
+				<version>1.5.20</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>co.nstant.in</groupId>
+				<artifactId>cbor</artifactId>
+				<version>0.8</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>6.14.3</version>
+				<scope>test</scope>
+			</dependency>
+
+		</dependencies>
+	</dependencyManagement>
+
 	<build>
-		<extensions>
-			<extension>
-				<groupId>kr.motd.maven</groupId>
-				<artifactId>os-maven-plugin</artifactId>
-				<version>1.6.0</version>
-			</extension>
-		</extensions>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.17</version>
-				<executions>
-					<execution>
-						<id>validate</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>check</goal>
-						</goals>
-						<configuration>
-							<encoding>UTF-8</encoding>
-							<configLocation>google_checks.xml</configLocation>
-							<consoleOutput>true</consoleOutput>
-							<failOnViolation>true</failOnViolation>
-							<violationSeverity>warning</violationSeverity>
-							<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.7.0</version>
-				<configuration>
-					<release>10</release>
-					<encoding>UTF-8</encoding>
-					<optimize>true</optimize>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>org.ow2.asm</groupId>
-						<artifactId>asm</artifactId>
-						<version>6.2</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
-				<groupId>org.xolstice.maven.plugins</groupId>
-				<artifactId>protobuf-maven-plugin</artifactId>
-				<version>0.5.1</version>
-				<extensions>true</extensions>
-				<configuration>
-					<protocArtifact>com.google.protobuf:protoc:${protobuf-version}:exe:${os.detected.classifier}</protocArtifact>
-					<pluginId>grpc-java</pluginId>
-					<pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc-version}:exe:${os.detected.classifier}</pluginArtifact>
-					<protoSourceRoot>${project.build.directory}/protoc</protoSourceRoot>
-					<clearOutputDirectory>false</clearOutputDirectory>
-					<protocPlugins>
-						<protocPlugin>
-							<id>reactor-grpc</id>
-							<artifactId>reactor-grpc</artifactId>
-							<groupId>com.salesforce.servicelibs</groupId>
-							<version>${reactor-grpc-version}</version>
-							<mainClass>com.salesforce.reactorgrpc.ReactorGrpcGenerator</mainClass>
-						</protocPlugin>
-					</protocPlugins>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>compile</goal>
-							<goal>compile-custom</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>test</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>test-compile</goal>
-							<goal>test-compile-custom</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.openapitools</groupId>
-				<artifactId>openapi-generator-maven-plugin</artifactId>
-				<version>3.0.3</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<configuration>
-							<inputSpec>../../rest_api/openapi.yaml</inputSpec>
-							<language>java</language>
-							<addCompileSourceRoot>true</addCompileSourceRoot>
-							<output>target/generated-sources/swagger</output>
-							<modelPackage>sawtooth.sdk.reactive.rest.model</modelPackage>
-							<modelNamePrefix>REST</modelNamePrefix>
-							<prependFormOrBodyParameters>true</prependFormOrBodyParameters>
-							<generateApis>false</generateApis>
-							<generateModelDocumentation>true</generateModelDocumentation>
-							<generateSupportingFiles>false</generateSupportingFiles>
-							<!-- java -jar ${m2_repo}/org/openapitools/openapi-generator-cli/3.0.3/openapi-generator-cli-3.0.3.jar 
-								config-help -l java 
-												<groupId>org.openapitools</groupId>
-				<artifactId>openapi-generator-maven-plugin</artifactId>
-				<version>3.0.3</version>
-								
-								<groupId>io.swagger</groupId>
-				<artifactId>swagger-codegen-maven-plugin</artifactId>
-				<version>3.0.0-rc1</version>
-								-->
-							<configOptions>
-								<library>jersey2</library>
-								<dateLibrary>java8</dateLibrary>
-								<hideGenerationTimestamp>true</hideGenerationTimestamp>
-								<serializableModel>true</serializableModel>
-								<java8>true</java8>
-							</configOptions>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-		<resources>
-			<resource>
-				<directory>../../protos</directory>
-				<includes>
-					<include>**/*.proto</include>
-				</includes>
-				<targetPath>${project.build.directory}/protoc</targetPath>
-			</resource>
-			<resource>
-				<directory>src/main/resources/protos/</directory>
-				<includes>
-					<include>**/*.proto</include>
-				</includes>
-				<targetPath>${project.build.directory}/protoc</targetPath>
-			</resource>
-			<resource>
-				<directory>src/main/resources/</directory>
-				<includes>
-					<include>*.properties</include>
-				</includes>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-		<testResources>
-			<testResource>
-				<directory>src/test/resources/</directory>
-				<includes>
-					<include>*.properties</include>
-				</includes>
-				<filtering>true</filtering>
-			</testResource>
-		</testResources>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-checkstyle-plugin</artifactId>
+					<version>2.17</version>
+					<executions>
+						<execution>
+							<id>validate</id>
+							<phase>validate</phase>
+							<goals>
+								<goal>check</goal>
+							</goals>
+							<configuration>
+								<encoding>UTF-8</encoding>
+								<configLocation>google_checks.xml</configLocation>
+								<consoleOutput>true</consoleOutput>
+								<failOnViolation>true</failOnViolation>
+								<violationSeverity>warning</violationSeverity>
+								<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.7.0</version>
+					<inherited>true</inherited>
+					<configuration>
+						<release>10</release>
+						<encoding>UTF-8</encoding>
+						<optimize>true</optimize>
+					</configuration>
+					<dependencies>
+						<dependency>
+							<groupId>org.ow2.asm</groupId>
+							<artifactId>asm</artifactId>
+							<version>6.2</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.xolstice.maven.plugins</groupId>
+					<artifactId>protobuf-maven-plugin</artifactId>
+					<version>0.5.1</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
-	<dependencies>
-		<dependency>
-			<groupId>com.salesforce.servicelibs</groupId>
-			<artifactId>reactor-grpc-stub</artifactId>
-			<version>${reactor-grpc-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.protobuf</groupId>
-			<artifactId>protobuf-java</artifactId>
-			<version>${protobuf-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-netty</artifactId>
-			<version>${grpc-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-protobuf</artifactId>
-			<version>${grpc-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-stub</artifactId>
-			<version>${grpc-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.zeromq</groupId>
-			<artifactId>jeromq</artifactId>
-			<version>0.4.3</version>
-		</dependency>
 
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-client</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-multipart</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.inject</groupId>
-			<artifactId>jersey-cdi2-se</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-moxy</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sun.activation</groupId>
-			<artifactId>javax.activation</artifactId>
-			<version>1.2.0</version>
-		</dependency>
-
-		<!-- dependency> <groupId>org.glassfish.jersey.ext.cdi</groupId> <artifactId>jersey-weld2-se</artifactId> 
-			<version>${jersey.version}</version> </dependency -->
-
-
-		<dependency>
-			<groupId>org.bitcoinj</groupId>
-			<artifactId>bitcoinj-core</artifactId>
-			<version>0.14.7</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.lambdaworks</groupId>  <!-- Exclude invalid, unneeded signed jar -->
-					<artifactId>scrypt</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.testng</groupId>
-			<artifactId>testng</artifactId>
-			<version>6.14.3</version>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<version>${apachelog-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-api</artifactId>
-			<version>${apachelog-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
-			<version>${apachelog-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-1.2-api</artifactId>
-			<version>${apachelog-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-core</artifactId>
-			<version>${swagger-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-jaxrs2</artifactId>
-			<version>${swagger-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-jaxrs2-servlet-initializer</artifactId>
-			<version>${swagger-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-models</artifactId>
-			<version>${swagger-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>io.swagger.core.v3</groupId>
-			<artifactId>swagger-annotations</artifactId>
-			<version>${swagger-version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.20</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>co.nstant.in</groupId>
-			<artifactId>cbor</artifactId>
-			<version>0.8</version>
-		</dependency>
-
-
-	</dependencies>
 </project>

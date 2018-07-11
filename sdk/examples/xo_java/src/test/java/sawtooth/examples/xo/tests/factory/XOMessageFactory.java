@@ -73,7 +73,7 @@ public class XOMessageFactory {
 		MESSAGEDIGESTER = MessageDigest.getInstance(digesterAlgo);
 		this.familyName = familyName;
 		this.familyVersion = familyVersion;
-		this.signerPrivateKey = xoPrivKey == null ? Signing.generatePrivateKey(new SecureRandom(
+		this.signerPrivateKey = xoPrivKey == null ? SawtoothSigner.generatePrivateKey(new SecureRandom(
 				ByteBuffer.allocate(Long.BYTES).putLong(Calendar.getInstance().getTimeInMillis()).array()))
 				: xoPrivKey;
 		List<String> binNameSpaces = new ArrayList<String>();
@@ -91,7 +91,7 @@ public class XOMessageFactory {
 		TransactionHeader.Builder thBuilder = TransactionHeader.newBuilder();
 		thBuilder.setFamilyName(familyName);
 		thBuilder.setFamilyVersion(familyVersion);
-		thBuilder.setSignerPublicKey(Signing.getPublicKey(signerPrivateKey));
+		thBuilder.setSignerPublicKey(SawtoothSigner.getPublicKey(signerPrivateKey));
 		thBuilder.setBatcherPublicKey(
 				batcherPubKey != null ? batcherPubKey.getPublicKeyAsHex() : thBuilder.getSignerPublicKey());
 		thBuilder.setPayloadSha512(new String(
@@ -116,7 +116,7 @@ public class XOMessageFactory {
 	}
 
 	public String createSignature(TransactionHeader header) {
-		return Signing.sign(signerPrivateKey, header.toByteArray());
+		return SawtoothSigner.sign(signerPrivateKey, header.toByteArray());
 	}
 
 	public boolean isValidMerkleAddress(String merkleAddress) {

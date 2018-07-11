@@ -10,6 +10,7 @@ buildNumber.properties
 **/.settings/
 **/.classpath
 **/.project
+**/.externalToolBuilders
 .project
 build/
 **/pom.xml.versionsBackup

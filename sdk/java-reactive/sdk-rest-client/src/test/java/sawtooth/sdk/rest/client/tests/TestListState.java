@@ -35,11 +35,12 @@ public class TestListState extends BaseTest{
 	
 	@Test(dependsOnMethods= {"testCDI"})
 	public void testListAll() throws InterruptedException, ExecutionException {
-		Future<RESTState> result = underTest.getState(null,null, null, 100, false);
+		Future<RESTState> futureResult = underTest.getState(null,null, null, 100, false);
+		assertNotNull(futureResult);
+		assertFalse(((CompletableFuture<RESTState>)futureResult).isCompletedExceptionally());
+		RESTState result =futureResult.get(); 
 		assertNotNull(result);
-		assertTrue(result.isDone());
-		assertFalse(((CompletableFuture<RESTState>)result).isCompletedExceptionally());
-		assertNotNull(result.get());
+		assertTrue(futureResult.isDone());
 	}
 
 }

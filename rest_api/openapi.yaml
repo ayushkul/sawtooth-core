@@ -656,6 +656,7 @@ definitions:
       signer_public_key:
         type: string
         example: 038bba5708acc262464c9fe30d3de9e905a9a5fa30cedd151dd9cd09ea26d46d00
+
   Transaction:
     properties:
       header:
@@ -708,6 +709,7 @@ definitions:
         items:
           type: string
           format: binary
+
   TransactionReceipts:
     type: array
     items:
@@ -723,6 +725,14 @@ definitions:
         items:
           type: string
           example: 540a6803971d1880ec73a96cb97815a95d374cbad5d865925e5aa0432fcf1931539afe10310c122c5eaae15df61236079abbf4f258889359c4d175516934484a
+      header_signature:
+        type: string
+        example: 89807bfc9089e37e00d87d97357de14cfbc455cd608438d426a625a30a0da9a31c406983803c4aa27e1f32a3ff61709e8ec4b56abbc553d7d330635b5d27029c
+      transactions:
+        type: array
+        items:
+          $ref: "#/definitions/Transaction"
+
   Batch:
     properties:
       header:
@@ -734,6 +744,10 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Transaction"
+      trace:
+         type: boolean
+         example: false
+
   BatchList:
     properties:
       batches:
@@ -741,6 +755,18 @@ definitions:
         items:
           $ref: "#/definitions/Batch"
 
+  BatchListing:
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Batch"
+      head:
+        $ref: "#/definitions/Head"
+      link:
+        $ref: "#/definitions/Link"
+      paging:
+        $ref: "#/definitions/Paging"
   BlockHeader:
     properties:
       block_num:

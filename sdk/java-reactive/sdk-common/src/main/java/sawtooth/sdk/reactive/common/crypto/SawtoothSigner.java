@@ -2,15 +2,11 @@ package sawtooth.sdk.reactive.common.crypto;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
-
-import javax.xml.bind.DatatypeConverter;
-
 import org.bitcoin.NativeSecp256k1;
 import org.bitcoin.NativeSecp256k1Util.AssertFailException;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Utils;
-
 import sawtooth.sdk.reactive.common.utils.FormattingUtils;
 
 public class SawtoothSigner {
@@ -55,7 +51,6 @@ public class SawtoothSigner {
 
 	public static byte[] generateCompactSig(ECKey privateKey, byte[] data) {
 		Sha256Hash hash = Sha256Hash.of(data);
-		//byte[] sig = privateKey.sign(hash).encodeToDER();
 		ECKey.ECDSASignature sig = privateKey.sign(hash);
 
 		byte[] csig = new byte[64];

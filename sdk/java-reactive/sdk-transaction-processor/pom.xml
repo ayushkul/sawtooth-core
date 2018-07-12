@@ -11,7 +11,7 @@
 	<artifactId>sdk-transaction-processor</artifactId>
 	<name>Sawtooth Java SDK - Transaction Processor</name>
 	<dependencies>
-	
+
 		<dependency>
 			<groupId>sawtooth</groupId>
 			<artifactId>sdk-common</artifactId>
@@ -22,12 +22,12 @@
 			<groupId>org.zeromq</groupId>
 			<artifactId>jeromq</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+
 	</dependencies>
 </project>

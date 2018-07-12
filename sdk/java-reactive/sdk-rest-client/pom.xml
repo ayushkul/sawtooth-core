@@ -15,6 +15,7 @@
 		<sw_rest_url>http://localhost:8080</sw_rest_url>
 		<sw_validator_url>http://localhost:4004</sw_validator_url>
 	</properties>
+
 	<dependencies>
 
 		<dependency>
@@ -54,38 +55,32 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-multipart</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.glassfish.jersey.inject</groupId>
 			<artifactId>jersey-cdi2-se</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.glassfish.jersey.media</groupId>
-			<artifactId>jersey-media-moxy</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-jaxrs2</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-models</artifactId>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-annotations</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -127,6 +122,13 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>co.nstant.in</groupId>
+			<artifactId>cbor</artifactId>
+			<version>0.8</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -153,7 +155,6 @@
 							<output>target/generated-sources/swagger</output>
 							<modelPackage>sawtooth.sdk.reactive.rest.model</modelPackage>
 							<modelNamePrefix>REST</modelNamePrefix>
-							<modelsToGenerate>Paging,Error,BatchStatuses,Entry,State,TransactionReceipt,TransactionReceipts</modelsToGenerate>
 							<generateApis>false</generateApis>
 							<generateModelDocumentation>true</generateModelDocumentation>
 							<generateSupportingFiles>false</generateSupportingFiles>
@@ -173,6 +174,36 @@
 				</executions>
 			</plugin>
 		</plugins>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources/</directory>
+				<includes>
+					<include>*.properties</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<testResources>
+			<testResource>
+				<directory>src/test/resources/</directory>
+				<includes>
+					<include>*.properties</include>
+				</includes>
+				<filtering>true</filtering>
+			</testResource>
+
+			<testResource>
+				<directory>../sdk-common/src/test/resources/</directory>
+				<includes>
+					<include>*.key</include>
+					<include>*.priv</include>
+					<include>*.pub</include>
+				</includes>
+				<filtering>false</filtering>
+			</testResource>
+		</testResources>
 
 	</build>
 </project>

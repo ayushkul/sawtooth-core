@@ -18,6 +18,7 @@
 		<spongycastle-version>1.58.0.0</spongycastle-version>
 		<ERROR_LEVEL>INFO</ERROR_LEVEL>
 		<SAWTOOTH_LOG_LEVEL>INFO</SAWTOOTH_LOG_LEVEL>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<modules>
@@ -95,22 +96,11 @@
 			</dependency>
 
 			<dependency>
-				<groupId>org.glassfish.jersey.media</groupId>
-				<artifactId>jersey-media-multipart</artifactId>
-				<version>${jersey-version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.glassfish.jersey.inject</groupId>
 				<artifactId>jersey-cdi2-se</artifactId>
 				<version>${jersey-version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.glassfish.jersey.media</groupId>
-				<artifactId>jersey-media-moxy</artifactId>
-				<version>${jersey-version}</version>
-			</dependency>
 
 			<!-- Java 10 adaptation for http://openjdk.java.net/jeps/320 -->
 			<dependency>
@@ -118,11 +108,13 @@
 				<artifactId>jaxb-api</artifactId>
 				<version>2.3.0</version>
 			</dependency>
+			
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
 				<version>2.3.0</version>
 			</dependency>
+			
 			<dependency>
 				<groupId>javax.activation</groupId>
 				<artifactId>javax.activation-api</artifactId>
@@ -179,12 +171,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>co.nstant.in</groupId>
-				<artifactId>cbor</artifactId>
-				<version>0.8</version>
-			</dependency>
-
-			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
 				<version>6.14.3</version>
@@ -200,7 +186,8 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>2.17</version>
+					<version>3.0.0</version>
+					<inherited>true</inherited>
 					<executions>
 						<execution>
 							<id>validate</id>
@@ -210,14 +197,20 @@
 							</goals>
 							<configuration>
 								<encoding>UTF-8</encoding>
-								<configLocation>google_checks.xml</configLocation>
+								<configLocation>${basedir}/../checkstyle.xml</configLocation>
 								<consoleOutput>true</consoleOutput>
-								<failOnViolation>true</failOnViolation>
+								<failOnViolation>false</failOnViolation>
 								<violationSeverity>warning</violationSeverity>
-								<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
 							</configuration>
 						</execution>
 					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>8.11</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -247,3 +240,4 @@
 	</build>
 
 </project>
+

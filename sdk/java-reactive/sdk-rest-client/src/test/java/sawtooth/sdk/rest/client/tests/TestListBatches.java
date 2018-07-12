@@ -8,7 +8,7 @@ import javax.enterprise.inject.spi.CDI;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
+import sawtooth.sdk.reactive.rest.model.RESTBatchListing;
 import sawtooth.sdk.reactive.rest.ops.RESTBatchOps;
 
 @Test
@@ -29,7 +29,7 @@ public class TestListBatches extends BaseTest{
 	
 	@Test(dependsOnMethods= {"testState"})
 	public void testListAll() throws InterruptedException, ExecutionException {
-		Object result = underTest.listBatches(null, null, 100, "false").get();
+		RESTBatchListing result = underTest.listBatches(null, null, 100, "false").get();
 		assertNotNull(result);
 	}
 

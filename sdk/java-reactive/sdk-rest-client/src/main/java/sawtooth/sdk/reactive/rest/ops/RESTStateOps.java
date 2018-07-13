@@ -14,6 +14,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import sawtooth.sdk.reactive.config.RESTClientConfig;
+import sawtooth.sdk.reactive.rest.model.RESTEntry;
 import sawtooth.sdk.reactive.rest.model.RESTState;
 
 /**
@@ -58,7 +59,7 @@ public class RESTStateOps {
 // @formatter:on
  *
    */
-  public Future<RESTState> getState(String head, String address, String start, int limit,
+  public Future<RESTState> getAllStates(String head, String address, String start, int limit,
       boolean reverse) throws InterruptedException, ExecutionException {
     WebTarget thisTarget = webTarget.path(REQPATH);
     thisTarget.queryParam("head", head).queryParam("address", address).queryParam("start", start)
@@ -68,6 +69,30 @@ public class RESTStateOps {
 
     return CompletableFuture
         .supplyAsync(() -> thisBuilder.accept(MediaType.APPLICATION_JSON).get(RESTState.class));
+  }
+  
+  /**
+   * https://sawtooth.hyperledger.org/docs/core/releases/latest/rest_api/endpoint_specs.html#get--state-address
+   * 
+   *Query Parameters:
+   *   
+// @formatter:off
+   *
+   * address (string) – Radix address of a leaf - URL
+   * head (string) – Index or id of head blockhead (string) – Index or id of head block - GET
+   *   
+// @formatter:on
+ *
+   */
+  public Future<RESTEntry> getOneState(String address , String head) throws InterruptedException, ExecutionException {
+    WebTarget thisTarget = webTarget.path(REQPATH+"/"+address);
+    if (head != null && ! head.isEmpty()) {
+      thisTarget.queryParam("head", head);
+    }
+    Invocation.Builder thisBuilder = thisTarget.request();
+
+    return CompletableFuture
+        .supplyAsync(() -> thisBuilder.accept(MediaType.APPLICATION_JSON).get(RESTEntry.class));
   }
 
 }

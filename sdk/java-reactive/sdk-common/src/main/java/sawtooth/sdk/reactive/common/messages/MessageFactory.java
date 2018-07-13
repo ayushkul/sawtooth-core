@@ -106,8 +106,7 @@ public class MessageFactory {
   }
 
 
-
-  public TransactionHeader createTransactionHeader(String payloadSha512, List<String> inputs,
+  public final TransactionHeader createTransactionHeader(String payloadSha512, List<String> inputs,
       List<String> outputs, List<String> dependencies, boolean needsNonce, String batcherPubKey) {
     TransactionHeader.Builder thBuilder = TransactionHeader.newBuilder();
     thBuilder.setFamilyName(familyName);

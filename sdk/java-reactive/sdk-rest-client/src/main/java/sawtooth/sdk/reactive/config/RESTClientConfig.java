@@ -17,7 +17,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sawtooth.sdk.reactive.rest.writer.MessageBodyWriter;
+import sawtooth.sdk.reactive.rest.writer.MessageBodyTransformer;
 
 public class RESTClientConfig {
 
@@ -76,7 +76,7 @@ public class RESTClientConfig {
 
     baseConfig.register(JacksonFeature.class);
     baseConfig.register(JacksonJaxbJsonProvider.class);
-    baseConfig.register(MessageBodyWriter.class);
+    baseConfig.register(MessageBodyTransformer.class);
 
     baseConfig.property(ClientProperties.FOLLOW_REDIRECTS, true);
     baseConfig.property(ClientProperties.USE_ENCODING, StandardCharsets.UTF_8.name());

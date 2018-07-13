@@ -10,8 +10,11 @@ import org.slf4j.LoggerFactory;
  * 
  * <a href="https://github.com/CarvalhoLeonardo">GitHub</a>
  * <a href="https://br.linkedin.com/in/leonardocarvalho">LinkedIn</a>
+ * 
+ * 
 // @formatter:off
- *	Basic bootstrap of some global properties of the packages:
+ *	
+ *  Basic bootstrap of some global properties of the packages:
  *
  *	- Asynchronous Logging
  *	- Spongy Castle registration on JCE

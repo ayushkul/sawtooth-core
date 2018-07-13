@@ -148,6 +148,14 @@
 					<pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc-version}:exe:${os.detected.classifier}</pluginArtifact>
 					<protoSourceRoot>${project.build.directory}/protoc</protoSourceRoot>
 					<clearOutputDirectory>false</clearOutputDirectory>
+					<token><![CDATA[
+							
+								The reactor-grpc plugin is used to generate some bindings for the reactive operation on the Messages I/O.
+								
+								The .protos are inherited from the main project, and expanded with some operations present
+								on src/main/resources/protos/
+
+					]]></token>
 					<protocPlugins>
 						<protocPlugin>
 							<id>reactor-grpc</id>

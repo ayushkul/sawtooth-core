@@ -56,7 +56,8 @@ public class FormattingUtils {
    * @return result a lowercase Hex representation from a byte[]
    */
   public static String bytesToHex(final byte[] bytes) {
-    return Hex.toHexString(bytes);
+    final String result = Hex.toHexString(bytes); 
+    return result;
   }
 
   public static String bytesToHexASCII(final byte[] bytes) {

@@ -24,14 +24,16 @@ public class SawtoothSigner {
 	 * @param privateKey the private key with which to sign
 	 * @param data the data to sign
 	 * @return String the signature
-	 * 
-	 * def sign(self, message, private_key):
+// @formatter:off
+	  def sign(self, message, private_key):
         try:
             signature = private_key.secp256k1_private_key.ecdsa_sign(message)
             signature = private_key.secp256k1_private_key \
                 .ecdsa_serialize_compact(signature)
 
             return signature.hex()
+            
+// @formatter:on
 	 */
 	public static String signHexSequence(ECKey privateKey, byte[] data) {
 

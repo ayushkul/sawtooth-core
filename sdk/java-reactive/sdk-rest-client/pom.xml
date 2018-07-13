@@ -158,10 +158,16 @@
 							<generateApis>false</generateApis>
 							<generateModelDocumentation>true</generateModelDocumentation>
 							<generateSupportingFiles>false</generateSupportingFiles>
-							<!-- java -jar ${m2_repo}/org/openapitools/openapi-generator-cli/3.0.3/openapi-generator-cli-3.0.3.jar 
-								config-help -l java <groupId>org.openapitools</groupId> <artifactId>openapi-generator-maven-plugin</artifactId> 
-								<version>3.0.3</version> <groupId>io.swagger</groupId> <artifactId>swagger-codegen-maven-plugin</artifactId> 
-								<version>3.0.0-rc1</version> -->
+							<token><![CDATA[
+							
+								This plugin is used to generate more Jersey friendly artifacts to deal with the endpoints.
+							
+							A good help in understanding this parameters can be get from 
+							
+							java -jar ${m2_repo}/org/openapitools/openapi-generator-cli/3.0.3/openapi-generator-cli-3.0.3.jar 
+								config-help -l java 
+
+							]]></token>
 							<configOptions>
 								<library>jersey2</library>
 								<dateLibrary>java8</dateLibrary>

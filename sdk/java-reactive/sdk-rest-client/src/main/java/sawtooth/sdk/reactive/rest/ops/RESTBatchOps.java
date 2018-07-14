@@ -48,15 +48,15 @@ public class RESTBatchOps {
    * https://sawtooth.hyperledger.org/docs/core/releases/latest/rest_api/endpoint_specs.html#post--batches
    * 
    */
-  public Future<Response> submitBatches(List<Batch> batches) {
+  public Future<Response> submitBatches(List<Batch> batches,MediaType mediaType) {
     BatchList.Builder rbl = BatchList.newBuilder();
     rbl.addAllBatches(batches);
     WebTarget thisTarget = webTarget.path(REQPATH);
     Invocation.Builder thisBuilder = thisTarget.request();
 
     return CompletableFuture
-        .supplyAsync(() -> thisBuilder.accept(MediaType.APPLICATION_OCTET_STREAM)
-            .post(Entity.entity(rbl.build(), MediaType.APPLICATION_OCTET_STREAM)));
+        .supplyAsync(() -> thisBuilder.accept(mediaType == null ?  MediaType.APPLICATION_OCTET_STREAM: mediaType.toString())
+            .post(Entity.entity(rbl.build(), mediaType == null ?  MediaType.APPLICATION_OCTET_STREAM: mediaType.toString())));
   }
 
   /**

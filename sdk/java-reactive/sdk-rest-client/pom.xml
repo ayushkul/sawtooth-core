@@ -55,6 +55,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-cbor</artifactId>
+			<version>${jackson-version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.glassfish.jersey.inject</groupId>
 			<artifactId>jersey-cdi2-se</artifactId>
 		</dependency>
@@ -96,12 +102,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>co.nstant.in</groupId>
-			<artifactId>cbor</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>com.sun.activation</groupId>
 			<artifactId>javax.activation</artifactId>
 		</dependency>
@@ -121,14 +121,7 @@
 			<artifactId>jaxb-runtime</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>co.nstant.in</groupId>
-			<artifactId>cbor</artifactId>
-			<version>0.8</version>
-			<scope>test</scope>
-		</dependency>
-
+		
 	</dependencies>
 	<build>
 		<plugins>

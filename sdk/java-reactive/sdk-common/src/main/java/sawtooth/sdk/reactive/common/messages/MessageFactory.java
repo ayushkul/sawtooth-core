@@ -219,6 +219,18 @@ public class MessageFactory {
     return pong;
   }
 
+  public Message getProcessRequest(String contextId, ByteBuffer payload, List<String> inputs,
+      List<String> outputs, List<String> dependencies, String batcherPubKey)
+      throws NoSuchAlgorithmException {
+    Message newMessage =
+        Message.newBuilder()
+            .setContent(createTpProcessRequest(contextId, payload, inputs, outputs, dependencies,
+                batcherPubKey).toByteString())
+            .setCorrelationId(generateId()).setMessageType(MessageType.TP_PROCESS_REQUEST).build();
+
+    return newMessage;
+  }
+  
   public Message getProcessRequest(String contextId, StringBuffer payload, List<String> inputs,
       List<String> outputs, List<String> dependencies, String batcherPubKey)
       throws NoSuchAlgorithmException {
@@ -242,7 +254,25 @@ public class MessageFactory {
         outputs, dependencies, Boolean.TRUE, batcherPubKey));
 
 
-    reqBuilder.setPayload(ByteString.copyFrom(hexFormattedDigest, StandardCharsets.ISO_8859_1));
+    reqBuilder.setPayload(ByteString.copyFrom(payload.toString().getBytes()));
+
+    reqBuilder.setSignature(createSignature(reqBuilder.getHeader()));
+
+    return reqBuilder.build();
+  }
+  
+  public TpProcessRequest createTpProcessRequest(String contextId, ByteBuffer payload,
+      List<String> inputs, List<String> outputs, List<String> dependencies, String batcherPubKey)
+      throws NoSuchAlgorithmException {
+    TpProcessRequest.Builder reqBuilder = TpProcessRequest.newBuilder();
+
+    String hexFormattedDigest = generateHASH512Hex(payload.array());
+
+    reqBuilder.setContextId(contextId).setHeader(createTransactionHeader(hexFormattedDigest, inputs,
+        outputs, dependencies, Boolean.TRUE, batcherPubKey));
+
+
+    reqBuilder.setPayload(ByteString.copyFrom(payload.array()));
 
     reqBuilder.setSignature(createSignature(reqBuilder.getHeader()));
 

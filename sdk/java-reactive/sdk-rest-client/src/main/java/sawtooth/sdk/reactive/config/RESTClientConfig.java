@@ -17,7 +17,7 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sawtooth.sdk.reactive.rest.writer.MessageBodyTransformer;
+import sawtooth.sdk.reactive.rest.writer.MessageBodyWriter;
 
 public class RESTClientConfig {
 
@@ -35,18 +35,21 @@ public class RESTClientConfig {
     try (InputStream in =
         RESTClientConfig.class.getClassLoader().getResourceAsStream("config.properties")) {
       configProperties.load(in);
-      validatorURL = configProperties.getProperty("sawtooth.validator.url");
+      validatorURL = System.getenv("sw.validator.url");
+      apiRESTURL = System.getenv("sw_rest_url");
+      
+      /**validatorURL = configProperties.getProperty("sawtooth.validator.url");
       if (validatorURL == null || validatorURL.isEmpty() || validatorURL.startsWith("${")) {
-        validatorURL = System.getProperty("sawtooth.validator.url");
+        validatorURL = System.getenv("sawtooth.validator.url");
       }
       if (LOGGER.isDebugEnabled())
         LOGGER.debug("Validator URL setting : " + validatorURL);
       apiRESTURL = configProperties.getProperty("sawtooth.rest.url");
       if (apiRESTURL == null || apiRESTURL.isEmpty() || apiRESTURL.startsWith("${")) {
-        apiRESTURL = System.getProperty("sawtooth.rest.url");
+        apiRESTURL = System.getenv("sawtooth.rest.url");
       }
       if (LOGGER.isDebugEnabled())
-        LOGGER.debug("REST URL setting : " + validatorURL);
+        LOGGER.debug("REST URL setting : " + apiRESTURL);*/
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -76,7 +79,7 @@ public class RESTClientConfig {
 
     baseConfig.register(JacksonFeature.class);
     baseConfig.register(JacksonJaxbJsonProvider.class);
-    baseConfig.register(MessageBodyTransformer.class);
+    baseConfig.register(MessageBodyWriter.class);
 
     baseConfig.property(ClientProperties.FOLLOW_REDIRECTS, true);
     baseConfig.property(ClientProperties.USE_ENCODING, StandardCharsets.UTF_8.name());

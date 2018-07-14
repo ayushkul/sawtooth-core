@@ -607,6 +607,10 @@ definitions:
         type: string
         format: byte
         example: Zm9vOmJhcg==
+      head:
+        type: string
+      link:
+        type: string
 
   State:
     properties:
@@ -767,6 +771,7 @@ definitions:
         $ref: "#/definitions/Link"
       paging:
         $ref: "#/definitions/Paging"
+
   BlockHeader:
     properties:
       block_num:
@@ -789,6 +794,7 @@ definitions:
       state_root_hash:
         type: string
         example: 708ca7fbb701799bb387f2e50deaca402e8502abe229f705693d2d4f350e1ad6
+
   Block:
     properties:
       header:

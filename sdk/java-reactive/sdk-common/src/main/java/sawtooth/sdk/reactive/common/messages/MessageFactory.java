@@ -80,8 +80,8 @@ public class MessageFactory {
       this.signerPrivateKey = privateKey;
     }
     if (publicKey == null) {
-      signerPublicKeyString = FormattingUtils.bytesToHex(signerPrivateKey.getPubKey());
       signerPublicKeyEncodedPointByte = signerPrivateKey.getPubKeyPoint().getEncoded(true);
+      signerPublicKeyString = FormattingUtils.bytesToHex(signerPublicKeyEncodedPointByte);
     } else {
       signerPublicKeyString = FormattingUtils.bytesToHex(publicKey.getPubKey());
       signerPublicKeyEncodedPointByte = publicKey.getPubKeyPoint().getEncoded(true);
@@ -89,8 +89,8 @@ public class MessageFactory {
 
     List<String> binNameSpaces = new ArrayList<String>();
     for (String eachNS : nameSpaces) {
-      binNameSpaces.add(MESSAGEDIGESTER_512.get().digest(eachNS.getBytes(StandardCharsets.US_ASCII))
-          .toString().substring(0, 6));
+      binNameSpaces
+          .add(FormattingUtils.hash512(eachNS.getBytes(StandardCharsets.UTF_8)).substring(0, 6));
     }
     this.nameSpaces = new String[nameSpaces.length];
     binNameSpaces.toArray(this.nameSpaces);
@@ -230,7 +230,7 @@ public class MessageFactory {
 
     return newMessage;
   }
-  
+
   public Message getProcessRequest(String contextId, StringBuffer payload, List<String> inputs,
       List<String> outputs, List<String> dependencies, String batcherPubKey)
       throws NoSuchAlgorithmException {
@@ -260,7 +260,7 @@ public class MessageFactory {
 
     return reqBuilder.build();
   }
-  
+
   public TpProcessRequest createTpProcessRequest(String contextId, ByteBuffer payload,
       List<String> inputs, List<String> outputs, List<String> dependencies, String batcherPubKey)
       throws NoSuchAlgorithmException {
@@ -268,8 +268,15 @@ public class MessageFactory {
 
     String hexFormattedDigest = generateHASH512Hex(payload.array());
 
-    reqBuilder.setContextId(contextId).setHeader(createTransactionHeader(hexFormattedDigest, inputs,
-        outputs, dependencies, Boolean.TRUE, batcherPubKey));
+    if (contextId != null && !contextId.isEmpty()) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Cointext id set: " + contextId);
+      }
+      reqBuilder.setContextId(contextId);
+    }
+
+    reqBuilder.setHeader(createTransactionHeader(hexFormattedDigest, inputs, outputs, dependencies,
+        Boolean.TRUE, batcherPubKey));
 
 
     reqBuilder.setPayload(ByteString.copyFrom(payload.array()));
@@ -527,7 +534,7 @@ public class MessageFactory {
   }
 
   private String generateHASH512Hex(StringBuffer toHash) {
-    byte[] payloadBin = toHash.toString().getBytes(StandardCharsets.US_ASCII);
+    byte[] payloadBin = toHash.toString().getBytes(StandardCharsets.UTF_8);
     return generateHASH512Hex(payloadBin);
   }
 

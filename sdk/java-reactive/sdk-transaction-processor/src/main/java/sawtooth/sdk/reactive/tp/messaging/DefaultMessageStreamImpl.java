@@ -26,7 +26,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import sawtooth.sdk.protobuf.Message;
-import sawtooth.sdk.reactive.common.messages.MessageFactory;
+import sawtooth.sdk.reactive.common.messaging.MessageFactory;
 
 /**
  * The client networking class.

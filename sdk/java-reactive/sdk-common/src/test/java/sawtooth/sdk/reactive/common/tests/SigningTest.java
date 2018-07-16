@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -37,7 +38,7 @@ import sawtooth.sdk.protobuf.Message;
 import sawtooth.sdk.protobuf.TransactionHeader;
 import sawtooth.sdk.reactive.common.config.SawtoothConfiguration;
 import sawtooth.sdk.reactive.common.crypto.SawtoothSigner;
-import sawtooth.sdk.reactive.common.messages.MessageFactory;
+import sawtooth.sdk.reactive.common.messaging.MessageFactory;
 import sawtooth.sdk.reactive.common.utils.FormattingUtils;
 
 /**
@@ -259,7 +260,7 @@ public class SigningTest {
    */
   @Test(dependsOnMethods = {"testBasicSigning"})
   public void testBatchSigning() throws NoSuchAlgorithmException, AssertFailException, IOException {
-    StringBuffer payload = new StringBuffer("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    ByteBuffer payload = ByteBuffer.wrap("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA".getBytes());
     Message intTX = mFact.getProcessRequest("", payload, null, null, null, null);
     Batch toSend = mFact.createBatch(Arrays.asList(intTX), true);
     BatchHeader constructedHeader = BatchHeader.parseFrom(toSend.getHeader());

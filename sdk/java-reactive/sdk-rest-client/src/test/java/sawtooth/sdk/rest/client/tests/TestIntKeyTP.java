@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import sawtooth.sdk.protobuf.Batch;
 import sawtooth.sdk.protobuf.Message;
-import sawtooth.sdk.reactive.common.messages.MessageFactory;
+import sawtooth.sdk.reactive.common.messaging.MessageFactory;
 import sawtooth.sdk.reactive.common.utils.FormattingUtils;
 import sawtooth.sdk.reactive.rest.ops.RESTBatchOps;
 

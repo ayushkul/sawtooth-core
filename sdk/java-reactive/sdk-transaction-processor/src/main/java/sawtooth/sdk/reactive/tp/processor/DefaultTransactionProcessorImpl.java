@@ -39,7 +39,7 @@ import sawtooth.sdk.protobuf.TpProcessResponse;
 import sawtooth.sdk.protobuf.TransactionHeader;
 import sawtooth.sdk.reactive.common.exceptions.InternalError;
 import sawtooth.sdk.reactive.common.exceptions.InvalidTransactionException;
-import sawtooth.sdk.reactive.common.messages.MessageFactory;
+import sawtooth.sdk.reactive.common.messaging.MessageFactory;
 import sawtooth.sdk.reactive.tp.messaging.DefaultMessageStreamImpl;
 import sawtooth.sdk.reactive.tp.messaging.MessagesStream;
 

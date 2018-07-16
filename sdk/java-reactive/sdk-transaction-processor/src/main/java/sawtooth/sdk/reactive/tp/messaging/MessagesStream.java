@@ -4,7 +4,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.TimeoutException;
 import sawtooth.sdk.protobuf.Message;
-import sawtooth.sdk.reactive.common.messages.MessageFactory;
+import sawtooth.sdk.reactive.common.messaging.MessageFactory;
 
 public abstract class MessagesStream extends SubmissionPublisher<Message> {
 

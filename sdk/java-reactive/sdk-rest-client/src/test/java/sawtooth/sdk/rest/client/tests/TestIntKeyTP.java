@@ -15,6 +15,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -30,7 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import sawtooth.sdk.protobuf.Batch;
 import sawtooth.sdk.protobuf.Message;
-import sawtooth.sdk.reactive.common.messages.MessageFactory;
+import sawtooth.sdk.reactive.common.messaging.MessageFactory;
 import sawtooth.sdk.reactive.common.utils.FormattingUtils;
 import sawtooth.sdk.reactive.rest.ops.RESTBatchOps;
 
@@ -40,6 +42,7 @@ public class TestIntKeyTP extends BaseTest {
   RESTBatchOps underTest;
   MessageFactory intMessageFactory = null;
   ECKey signerPrivateKey, signerPublicKey;
+  String startAddressData = "";
 
   @BeforeClass
   public void getCDIBeans() throws ClassNotFoundException, NoSuchAlgorithmException {
@@ -56,11 +59,14 @@ public class TestIntKeyTP extends BaseTest {
       String linePublic = publicKeyReader.readLine();
       privkey = new BigInteger(1, Hex.decode(linePublic));
       signerPublicKey = ECKey.fromPublicOnly(ECKey.publicPointFromPrivate(privkey));
+
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    intMessageFactory = new MessageFactory("intkey", "1.0", signerPrivateKey, null, "1cf126");
+    intMessageFactory = new MessageFactory("intkey", "1.0", signerPrivateKey, null, "intkey");
+    startAddressData =
+        FormattingUtils.hash512("intkey".getBytes(StandardCharsets.UTF_8)).substring(0, 6);
 
   }
 
@@ -80,17 +86,26 @@ public class TestIntKeyTP extends BaseTest {
    * @throws CborException
    * @throws NoSuchAlgorithmException
    * @throws AssertFailException
-   * @throws IOException 
+   * @throws IOException
    */
   @Test(dependsOnMethods = {"testState"})
   public void testSendTransaction() throws InterruptedException, ExecutionException,
       NoSuchAlgorithmException, AssertFailException, IOException {
-    IntKeyPayload body = new IntKeyPayload("set", "aaaaaaaaaaaaaaaaaaaa", 0);
+    Random rnd = new Random();
+    
+    String randomAddress = UUID.randomUUID().toString();
+    int position = rnd.nextInt(randomAddress.length()-10);
+    randomAddress = randomAddress.substring(position, position+6);
+    String addressToSet =
+        FormattingUtils.hash512(randomAddress.getBytes());
+    addressToSet = startAddressData + addressToSet.substring(addressToSet.length() - 64);
+    IntKeyPayload body = new IntKeyPayload("set", randomAddress, rnd.nextInt(100));
     ByteBuffer payload = ByteBuffer.wrap(body.getPayload());
-    Message intTX = intMessageFactory.getProcessRequest("----", payload, null, null, null, null);
-    Batch toSend = intMessageFactory.createBatch(Arrays.asList(intTX), true);
+    Message intTX = intMessageFactory.getProcessRequest(null, payload,
+        Arrays.asList(addressToSet), Arrays.asList(addressToSet), null, null);
+    Batch toSend = intMessageFactory.createBatch(Arrays.asList(intTX), false);
 
-    Future<Response> result = underTest.submitBatches(Arrays.asList(toSend),null);
+    Future<Response> result = underTest.submitBatches(Arrays.asList(toSend), null);
     assertNotNull(result);
     assertFalse(((CompletableFuture<Response>) result).isCompletedExceptionally());
     Response serverResult = result.get();
@@ -111,7 +126,7 @@ public class TestIntKeyTP extends BaseTest {
     }
 
 
-    public byte[] getPayload() throws IOException{
+    public byte[] getPayload() throws IOException {
 
       byte[] cborData = mapper.writeValueAsBytes(data);
       return cborData;

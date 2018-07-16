@@ -1,4 +1,4 @@
-package sawtooth.sdk.reactive.common.messages;
+package sawtooth.sdk.reactive.common.messaging;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -80,17 +80,17 @@ public class MessageFactory {
       this.signerPrivateKey = privateKey;
     }
     if (publicKey == null) {
-      signerPublicKeyString = FormattingUtils.bytesToHex(signerPrivateKey.getPubKey());
       signerPublicKeyEncodedPointByte = signerPrivateKey.getPubKeyPoint().getEncoded(true);
+      signerPublicKeyString = FormattingUtils.bytesToHex(signerPublicKeyEncodedPointByte);
     } else {
-      signerPublicKeyString = FormattingUtils.bytesToHex(publicKey.getPubKey());
       signerPublicKeyEncodedPointByte = publicKey.getPubKeyPoint().getEncoded(true);
+      signerPublicKeyString = FormattingUtils.bytesToHex(publicKey.getPubKey());
     }
 
     List<String> binNameSpaces = new ArrayList<String>();
     for (String eachNS : nameSpaces) {
-      binNameSpaces.add(MESSAGEDIGESTER_512.get().digest(eachNS.getBytes(StandardCharsets.US_ASCII))
-          .toString().substring(0, 6));
+      binNameSpaces
+          .add(FormattingUtils.hash512(eachNS.getBytes(StandardCharsets.UTF_8)).substring(0, 6));
     }
     this.nameSpaces = new String[nameSpaces.length];
     binNameSpaces.toArray(this.nameSpaces);
@@ -135,7 +135,7 @@ public class MessageFactory {
     return thBuilder.build();
   }
 
-  public String createSignature(TransactionHeader header) {
+  public String createHeaderSignature(TransactionHeader header) {
     return SawtoothSigner.signHexSequence(signerPrivateKey, header.toByteArray());
   }
 
@@ -230,37 +230,8 @@ public class MessageFactory {
 
     return newMessage;
   }
-  
-  public Message getProcessRequest(String contextId, StringBuffer payload, List<String> inputs,
-      List<String> outputs, List<String> dependencies, String batcherPubKey)
-      throws NoSuchAlgorithmException {
-    Message newMessage =
-        Message.newBuilder()
-            .setContent(createTpProcessRequest(contextId, payload, inputs, outputs, dependencies,
-                batcherPubKey).toByteString())
-            .setCorrelationId(generateId()).setMessageType(MessageType.TP_PROCESS_REQUEST).build();
-
-    return newMessage;
-  }
-
-  public TpProcessRequest createTpProcessRequest(String contextId, StringBuffer payload,
-      List<String> inputs, List<String> outputs, List<String> dependencies, String batcherPubKey)
-      throws NoSuchAlgorithmException {
-    TpProcessRequest.Builder reqBuilder = TpProcessRequest.newBuilder();
-
-    String hexFormattedDigest = generateHASH512Hex(payload);
-
-    reqBuilder.setContextId(contextId).setHeader(createTransactionHeader(hexFormattedDigest, inputs,
-        outputs, dependencies, Boolean.TRUE, batcherPubKey));
 
 
-    reqBuilder.setPayload(ByteString.copyFrom(payload.toString().getBytes()));
-
-    reqBuilder.setSignature(createSignature(reqBuilder.getHeader()));
-
-    return reqBuilder.build();
-  }
-  
   public TpProcessRequest createTpProcessRequest(String contextId, ByteBuffer payload,
       List<String> inputs, List<String> outputs, List<String> dependencies, String batcherPubKey)
       throws NoSuchAlgorithmException {
@@ -268,13 +239,20 @@ public class MessageFactory {
 
     String hexFormattedDigest = generateHASH512Hex(payload.array());
 
-    reqBuilder.setContextId(contextId).setHeader(createTransactionHeader(hexFormattedDigest, inputs,
-        outputs, dependencies, Boolean.TRUE, batcherPubKey));
+    if (contextId != null && !contextId.isEmpty()) {
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Context id set: " + contextId);
+      }
+      reqBuilder.setContextId(contextId);
+    }
+
+    reqBuilder.setHeader(createTransactionHeader(hexFormattedDigest, inputs, outputs, dependencies,
+        Boolean.TRUE, batcherPubKey));
 
 
     reqBuilder.setPayload(ByteString.copyFrom(payload.array()));
 
-    reqBuilder.setSignature(createSignature(reqBuilder.getHeader()));
+    reqBuilder.setSignature(createHeaderSignature(reqBuilder.getHeader()));
 
     return reqBuilder.build();
   }
@@ -439,16 +417,16 @@ public class MessageFactory {
   }
 
 
-  private Transaction createTransaction(StringBuffer payload, List<String> inputs,
+  private Transaction createTransaction(ByteBuffer payload, List<String> inputs,
       List<String> outputs, List<String> dependencies, String batcherPubKey)
       throws NoSuchAlgorithmException {
     Transaction.Builder transactionBuilder = Transaction.newBuilder();
     transactionBuilder
         .setPayload(ByteString.copyFrom(payload.toString(), StandardCharsets.US_ASCII));
-    TransactionHeader header = createTransactionHeader(generateHASH512Hex(payload), inputs, outputs,
-        dependencies, Boolean.TRUE, batcherPubKey);
+    TransactionHeader header = createTransactionHeader(generateHASH512Hex(payload.array()), inputs,
+        outputs, dependencies, Boolean.TRUE, batcherPubKey);
     transactionBuilder.setHeader(header.toByteString());
-    transactionBuilder.setHeaderSignature(createSignature(header));
+    transactionBuilder.setHeaderSignature(createHeaderSignature(header));
 
     return transactionBuilder.build();
   }
@@ -465,7 +443,7 @@ public class MessageFactory {
             theRequest.getHeader().getOutputsList(), theRequest.getHeader().getDependenciesList(),
             Boolean.TRUE, theRequest.getHeader().getBatcherPublicKey());
     transactionBuilder.setHeader(header.toByteString());
-    transactionBuilder.setHeaderSignature(createSignature(header));
+    transactionBuilder.setHeaderSignature(createHeaderSignature(header));
 
     return transactionBuilder.build();
   }
@@ -482,13 +460,12 @@ public class MessageFactory {
         Transaction toAdd;
         if (et.getMessageType().equals(MessageType.TP_PROCESS_REQUEST)) {
           toAdd = createTransactionFromProcessRequest(et);
-          transactionListBuilder.addTransactions(toAdd);
-          result = toAdd.getHeaderSignature();
+
         } else {
           toAdd = Transaction.parseFrom(et.getContent());
-          transactionListBuilder.addTransactions(toAdd);
-          result = toAdd.getHeaderSignature();
         }
+        transactionListBuilder.addTransactions(toAdd);
+        result = toAdd.getHeaderSignature();
       } catch (InvalidProtocolBufferException e) {
         LOGGER.error(
             "InvalidProtocolBufferException on Message " + et.toString() + " : " + e.getMessage());
@@ -524,11 +501,6 @@ public class MessageFactory {
    */
   private String generateId() {
     return new String(MESSAGEDIGESTER_512.get().digest(UUID.randomUUID().toString().getBytes()));
-  }
-
-  private String generateHASH512Hex(StringBuffer toHash) {
-    byte[] payloadBin = toHash.toString().getBytes(StandardCharsets.US_ASCII);
-    return generateHASH512Hex(payloadBin);
   }
 
   private String generateHASH512Hex(byte[] toHash) {

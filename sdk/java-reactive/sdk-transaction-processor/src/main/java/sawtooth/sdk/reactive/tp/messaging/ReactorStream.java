@@ -16,7 +16,7 @@ import org.zeromq.ZMQ;
 import org.zeromq.ZMsg;
 import com.google.protobuf.InvalidProtocolBufferException;
 import sawtooth.sdk.protobuf.Message;
-import sawtooth.sdk.reactive.common.messages.MessageFactory;
+import sawtooth.sdk.reactive.common.messaging.MessageFactory;
 
 public class ReactorStream extends MessagesStream implements Runnable {
 

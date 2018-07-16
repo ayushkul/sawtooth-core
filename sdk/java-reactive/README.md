@@ -4,7 +4,7 @@ This project intends to be a Java SDK to projects that will interact with a Sawt
 
 It is based on the initial work of the Sawtooth team, from Intel.
 
-__ This is an ongoing effort, any help is welcome. __
+__This is an ongoing effort, any help is welcome.__
 
 
 ## Modules

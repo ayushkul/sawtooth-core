@@ -35,23 +35,22 @@ public class RESTClientConfig {
     try (InputStream in =
         RESTClientConfig.class.getClassLoader().getResourceAsStream("config.properties")) {
       configProperties.load(in);
-      validatorURL = System.getenv("sw.validator.url");
-      apiRESTURL = System.getenv("sw_rest_url");
-      
-      /**validatorURL = configProperties.getProperty("sawtooth.validator.url");
+
+
+      validatorURL = configProperties.getProperty("sawtooth.validator.url");
       if (validatorURL == null || validatorURL.isEmpty() || validatorURL.startsWith("${")) {
-        validatorURL = System.getenv("sawtooth.validator.url");
+        validatorURL = System.getenv("sw.validator.url");
       }
       if (LOGGER.isDebugEnabled())
         LOGGER.debug("Validator URL setting : " + validatorURL);
       apiRESTURL = configProperties.getProperty("sawtooth.rest.url");
       if (apiRESTURL == null || apiRESTURL.isEmpty() || apiRESTURL.startsWith("${")) {
-        apiRESTURL = System.getenv("sawtooth.rest.url");
+        apiRESTURL = System.getenv("sw.rest.url");
       }
       if (LOGGER.isDebugEnabled())
-        LOGGER.debug("REST URL setting : " + apiRESTURL);*/
+        LOGGER.debug("REST URL setting : " + apiRESTURL);
     } catch (IOException e) {
-      // TODO Auto-generated catch block
+      LOGGER.error("Configuration file not found, problems ahead : " + e.getMessage());
       e.printStackTrace();
     }
   }

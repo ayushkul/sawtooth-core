@@ -51,7 +51,7 @@ Build it, from the [Documentation :](https://bitcoinj.github.io/javadoc/0.14.7/o
 
 ## Running the tests
 
-The tests would need a running Sawtooth network.
+The REST tests would need a running Sawtooth network.
 
 If it isn't at localhost, you can change the address on the maven CLI:
 

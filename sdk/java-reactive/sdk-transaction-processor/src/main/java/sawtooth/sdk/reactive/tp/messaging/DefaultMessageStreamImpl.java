@@ -25,6 +25,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sawtooth.sdk.protobuf.Message;
 import sawtooth.sdk.reactive.common.messaging.MessageFactory;
 
@@ -36,7 +38,8 @@ public class DefaultMessageStreamImpl extends MessagesStream {
   private LinkedBlockingQueue<SendReceiveThread.MessageWrapper> receiveQueue;
   private SendReceiveThread sendReceiveThread;
   private Thread thread;
-  private MessageFactory mesgFact;
+
+  private final static Logger LOGGER = LoggerFactory.getLogger(DefaultMessageStreamImpl.class);
 
   /**
    * The constructor.
@@ -45,10 +48,15 @@ public class DefaultMessageStreamImpl extends MessagesStream {
    *
    */
   public DefaultMessageStreamImpl(String address) {
+    if (LOGGER.isDebugEnabled())
+      LOGGER.debug("Creating for address " + address + " ...");
     this.futureHashMap = new ConcurrentHashMap<String, Future<Message>>();
     this.receiveQueue = new LinkedBlockingQueue<SendReceiveThread.MessageWrapper>();
     this.sendReceiveThread = new SendReceiveThread(address, futureHashMap, this.receiveQueue);
     this.thread = new Thread(sendReceiveThread);
+    if (LOGGER.isDebugEnabled())
+      LOGGER.debug("Starting.");
+
     this.thread.start();
   }
 
@@ -62,6 +70,8 @@ public class DefaultMessageStreamImpl extends MessagesStream {
    */
   @Override
   public Future<Message> send(Message payload) {
+    if (LOGGER.isDebugEnabled())
+      LOGGER.debug("Sending " + payload.toString());
 
     Future<Message> future = this.sendReceiveThread.sendMessage(payload);
     this.futureHashMap.put(payload.getCorrelationId(), future);
@@ -78,6 +88,8 @@ public class DefaultMessageStreamImpl extends MessagesStream {
    */
   @Override
   public void sendBack(String correlationId, Message payload) {
+    if (LOGGER.isDebugEnabled())
+      LOGGER.debug("Sending " + payload.toString());
     this.sendReceiveThread.sendMessage(payload);
   }
 
@@ -101,12 +113,16 @@ public class DefaultMessageStreamImpl extends MessagesStream {
    */
   @Override
   public Future<Message> receive() {
+    if (LOGGER.isDebugEnabled())
+      LOGGER.debug("Trying to receive... ");
     SendReceiveThread.MessageWrapper result = null;
     try {
       result = this.receiveQueue.take();
     } catch (InterruptedException ie) {
       ie.printStackTrace();
     }
+    if (LOGGER.isDebugEnabled())
+      LOGGER.debug("Received " + result.message.toString());
     return CompletableFuture.completedFuture(result.message);
   }
 
@@ -132,7 +148,7 @@ public class DefaultMessageStreamImpl extends MessagesStream {
 
   @Override
   public void setMessageFactory(MessageFactory mFactory) {
-    mesgFact = mFactory;
+    // mesgFact = mFactory;
 
   }
 

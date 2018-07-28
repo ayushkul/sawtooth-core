@@ -110,10 +110,21 @@ public class DefaultTransactionProcessorImpl implements TransactionProcessor {
   public void addHandler(TransactionHandler handler) {
 
     try {
+      LOGGER.info("Trying to register...");
       Future<Message> fut = this.stream.send(handler.getMessageFactory().getRegisterRequest());
-      fut.get();
+      LOGGER.info("Step 1 : " + fut.toString());
+      Message response = fut.get();
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Step 1 message " + response.toString());
+      }
+      response = this.stream.receive().get();
+      LOGGER.info("Registered : "+response.toString());
+      if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("Step 2 message " + response.toString());
+      }
       this.registered = true;
       this.handlers.add(handler);
+      LOGGER.info("Registered handler for " + handler.transactionFamilyName());
     } catch (InterruptedException ie) {
       ie.printStackTrace();
     } catch (ExecutionException e) {
@@ -195,6 +206,7 @@ public class DefaultTransactionProcessorImpl implements TransactionProcessor {
 
   @Override
   public void run() {
+    LOGGER.info("run()");
     while (true) {
       if (!this.handlers.isEmpty()) {
         try {

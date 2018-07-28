@@ -10,9 +10,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.bitcoinj.core.ECKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -310,11 +308,11 @@ public class MessageFactory {
   }
 
   private TpStateGetResponse createTpStateGetResponse(List<TpStateEntry> entries) {
-    Optional<TpStateEntry> wrongAddressEntry =
-        entries.stream().filter(str -> !isValidMerkleAddress(str.getAddress())).findFirst();
-    if (wrongAddressEntry.isPresent()) {
-      LOGGER.error("Invalid Address for TpStateEntry : " + wrongAddressEntry.get().getAddress());
-      return null;
+    for (TpStateEntry eachEntry : entries) {
+      if (!isValidMerkleAddress(eachEntry.getAddress())) {
+        LOGGER.error("Invalid Address for TpStateEntry : " + eachEntry.getAddress());
+        return null;
+      }
     }
 
     TpStateGetResponse.Builder reqBuilder = TpStateGetResponse.newBuilder();
@@ -332,11 +330,11 @@ public class MessageFactory {
   }
 
   private TpStateGetRequest createTpStateGetRequest(List<String> addresses) {
-    Optional<String> wrongAddress =
-        addresses.stream().filter(str -> !isValidMerkleAddress(str)).findFirst();
-    if (wrongAddress.isPresent()) {
-      LOGGER.error("Invalid Address " + wrongAddress.get());
-      return null;
+    for (String eachAddress : addresses) {
+      if (!isValidMerkleAddress(eachAddress)) {
+        LOGGER.error("Invalid Address for TpStateEntry : " + eachAddress);
+        return null;
+      }
     }
 
     TpStateGetRequest.Builder reqBuilder = TpStateGetRequest.newBuilder();
@@ -364,23 +362,24 @@ public class MessageFactory {
       entryArrayList.add(ourTpStateEntry);
     }
 
-    Optional<TpStateEntry> wrongAddress =
-        entryArrayList.stream().filter(str -> !isValidMerkleAddress(str.getAddress())).findFirst();
-    if (wrongAddress.isPresent()) {
-      LOGGER.error("Invalid Address " + wrongAddress.get().getAddress());
-      return null;
+    for (TpStateEntry eachEntry : entryArrayList) {
+      if (!isValidMerkleAddress(eachEntry.getAddress())) {
+        LOGGER.error("Invalid Address for TpStateEntry : " + eachEntry.getAddress());
+        return null;
+      }
     }
+
 
     TpStateSetRequest.Builder reqBuilder = TpStateSetRequest.newBuilder().setContextId(contextId);
 
     TpStateEntry.Builder stateBuilder = TpStateEntry.newBuilder();
-
-    reqBuilder.addAllEntries(entryArrayList.stream().sequential().map(es -> {
+    
+    for (TpStateEntry eachSEntry:entryArrayList ) {
       stateBuilder.clear();
-      stateBuilder.setAddress(es.getAddress());
-      stateBuilder.setData(es.getData());
-      return stateBuilder.build();
-    }).collect(Collectors.toList()));
+      stateBuilder.setAddress(eachSEntry.getAddress());
+      stateBuilder.setData(eachSEntry.getData());
+      reqBuilder.addEntries(stateBuilder.build());
+    }
 
     return reqBuilder.build();
 
@@ -395,11 +394,11 @@ public class MessageFactory {
   }
 
   private TpStateDeleteRequest createTpStateDeleteRequest(List<String> addresses) {
-    Optional<String> wrongAddress =
-        addresses.stream().filter(str -> !isValidMerkleAddress(str)).findFirst();
-    if (wrongAddress.isPresent()) {
-      LOGGER.error("Invalid Address " + wrongAddress.get());
-      return null;
+    for (String eachEntry : addresses) {
+      if (!isValidMerkleAddress(eachEntry)) {
+        LOGGER.error("Invalid Address for TpStateEntry : " + eachEntry);
+        return null;
+      }
     }
 
     TpStateDeleteRequest.Builder reqBuilder = TpStateDeleteRequest.newBuilder();
@@ -409,11 +408,11 @@ public class MessageFactory {
   }
 
   private TpStateDeleteResponse createTpStateDeleteResponse(List<String> addresses) {
-    Optional<String> wrongAddress =
-        addresses.stream().filter(str -> !isValidMerkleAddress(str)).findFirst();
-    if (wrongAddress.isPresent()) {
-      LOGGER.error("Invalid Address " + wrongAddress.get());
-      return null;
+    for (String eachEntry : addresses) {
+      if (!isValidMerkleAddress(eachEntry)) {
+        LOGGER.error("Invalid Address for TpStateEntry : " + eachEntry);
+        return null;
+      }
     }
 
     TpStateDeleteResponse.Builder reqBuilder = TpStateDeleteResponse.newBuilder();
@@ -491,26 +490,27 @@ public class MessageFactory {
 
 
     TransactionList.Builder transactionListBuilder = TransactionList.newBuilder();
+    String result = "";
+    List<String> txnSignatures = new ArrayList<>();
 
-    List<String> txnSignatures = transactions.stream().map(et -> {
-      String result = "";
+    for (Message eachTX : transactions) {
       try {
         Transaction toAdd;
-        if (et.getMessageType().equals(MessageType.TP_PROCESS_REQUEST)) {
-          toAdd = createTransactionFromProcessRequest(et);
+        if (eachTX.getMessageType().equals(MessageType.TP_PROCESS_REQUEST)) {
+          toAdd = createTransactionFromProcessRequest(eachTX);
 
         } else {
-          toAdd = Transaction.parseFrom(et.getContent());
+          toAdd = Transaction.parseFrom(eachTX.getContent());
         }
         transactionListBuilder.addTransactions(toAdd);
         result = toAdd.getHeaderSignature();
       } catch (InvalidProtocolBufferException e) {
-        LOGGER.error(
-            "InvalidProtocolBufferException on Message " + et.toString() + " : " + e.getMessage());
+        LOGGER.error("InvalidProtocolBufferException on Message " + eachTX.toString() + " : "
+            + e.getMessage());
         e.printStackTrace();
       }
-      return result;
-    }).collect(Collectors.toList());
+      txnSignatures.add(result);
+    }
 
 
     BatchHeader batchHeader = BatchHeader.newBuilder().addAllTransactionIds(txnSignatures)
@@ -538,7 +538,9 @@ public class MessageFactory {
    * @return a random String
    */
   private String generateId() {
-    return FormattingUtils.bytesToHex(MESSAGEDIGESTER_512.get().digest(UUID.randomUUID().toString().getBytes())).substring(0, 22);
+    return FormattingUtils
+        .bytesToHex(MESSAGEDIGESTER_512.get().digest(UUID.randomUUID().toString().getBytes()))
+        .substring(0, 22);
   }
 
   private String generateHASH512Hex(byte[] toHash) {

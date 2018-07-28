@@ -10,13 +10,75 @@
 	</parent>
 	<artifactId>sdk-transaction-processor</artifactId>
 	<name>Sawtooth Java SDK - Transaction Processor</name>
-	<dependencies>
 
-		<dependency>
-			<groupId>sawtooth</groupId>
-			<artifactId>sdk-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+	<profiles>
+		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>sawtooth</groupId>
+					<artifactId>sdk-common</artifactId>
+					<version>${project.version}</version>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>jdk8</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<jdk>1.8</jdk>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>sawtooth</groupId>
+					<artifactId>sdk-common</artifactId>
+					<classifier>jdk8</classifier>
+					<version>${project.version}</version>
+				</dependency>
+			</dependencies>
+			<build>
+				<finalName>${project.artifactId}</finalName>
+				<plugins>
+					<plugin>
+						<artifactId>maven-jar-plugin</artifactId>
+						<configuration>
+							<classifier>jdk8</classifier>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<version>3.5.1</version>
+						<configuration>
+							<source>1.8</source>
+							<target>1.8</target>
+							<testSource>1.8</testSource>
+							<testTarget>1.8</testTarget>
+							<includes>
+								<include>${basedir}/src/main/java/**/*.java</include>
+							</includes>
+							<excludes>
+								<exclude>${basedir}/src/main/java/sawtooth/sdk/reactive/tp/messaging/ReactorStream.*</exclude>
+								<exclude>${basedir}/src/main/java/sawtooth/sdk/reactive/tp/processor/TransactionHandler.*</exclude>
+								<exclude>${basedir}/src/main/java/sawtooth/sdk/reactive/tp/messaging/MessagesStream.*</exclude>
+							</excludes>
+							<testIncludes>
+								<testInclude>${basedir}/src/main/java/**/*.java</testInclude>
+							</testIncludes>
+							<testExcludes>
+								<testExclude>${basedir}/src/test/java/**/*.java)</testExclude>
+							</testExcludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<dependencies>
 
 		<dependency>
 			<groupId>org.zeromq</groupId>
@@ -27,6 +89,11 @@
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
 		</dependency>
 
 	</dependencies>

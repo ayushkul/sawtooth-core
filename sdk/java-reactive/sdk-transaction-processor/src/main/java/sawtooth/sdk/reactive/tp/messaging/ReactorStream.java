@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.TimeoutException;
@@ -106,13 +107,13 @@ public class ReactorStream extends MessagesStream implements Runnable {
   }
 
   @Override
-  public Future<Message> receive() {
+  public CompletableFuture<Message> receive() {
     // TODO Auto-generated method stub
     return null;
   }
 
   @Override
-  public Future<Message> receive(long timeout) throws TimeoutException {
+  public CompletableFuture<Message> receive(long timeout) throws TimeoutException {
     // TODO Auto-generated method stub
     return null;
   }

@@ -53,7 +53,7 @@ public class RESTBatchOps {
     rbl.addAllBatches(batches);
     WebTarget thisTarget = webTarget.path(REQPATH);
     Invocation.Builder thisBuilder = thisTarget.request();
-
+    
     return CompletableFuture
         .supplyAsync(() -> thisBuilder.accept(mediaType == null ?  MediaType.APPLICATION_OCTET_STREAM: mediaType.toString())
             .post(Entity.entity(rbl.build(), mediaType == null ?  MediaType.APPLICATION_OCTET_STREAM: mediaType.toString())));

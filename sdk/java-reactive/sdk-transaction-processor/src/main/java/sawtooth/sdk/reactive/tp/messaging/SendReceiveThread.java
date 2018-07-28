@@ -38,7 +38,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import sawtooth.sdk.protobuf.Message;
 
 /**
- * An internal messaging implementation used by the Stream class.
+ * An internal messaging implementation used by the DefaultMessageStreamImpl class.
  */
 class SendReceiveThread implements Runnable {
 
@@ -112,12 +112,12 @@ class SendReceiveThread implements Runnable {
       try {
         Message message = Message.parseFrom(byteArrayOutputStream.toByteArray());
         if (this.futures.containsKey(message.getCorrelationId())) {
-          Future<Message> future = this.futures.get(message.getCorrelationId());
-          this.futures.put(message.getCorrelationId(), future);
-        } else {
-          MessageWrapper wrapper = new MessageWrapper(message);
-          this.receiveQueue.put(wrapper);
+          this.futures.put(message.getCorrelationId(), CompletableFuture.completedFuture(message));
+
         }
+        MessageWrapper wrapper = new MessageWrapper(message);
+        this.receiveQueue.put(wrapper);
+
       } catch (InterruptedException ie) {
         ie.printStackTrace();
       } catch (InvalidProtocolBufferException ipe) {

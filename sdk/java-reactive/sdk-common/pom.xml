@@ -9,7 +9,175 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>sdk-common</artifactId>
+
 	<name>Sawtooth Java SDK - Common artifacts</name>
+
+	<profiles>
+		<profile>
+			<id>default</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<dependencies>
+
+				<dependency>
+					<groupId>com.salesforce.servicelibs</groupId>
+					<artifactId>reactor-grpc-stub</artifactId>
+				</dependency>
+
+				<dependency>
+					<groupId>javax.annotation</groupId>
+					<artifactId>javax.annotation-api</artifactId>
+				</dependency>
+
+				<dependency>
+					<groupId>javax.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+				</dependency>
+
+				<dependency>
+					<groupId>org.glassfish.jaxb</groupId>
+					<artifactId>jaxb-runtime</artifactId>
+					<scope>runtime</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>javax.activation</groupId>
+					<artifactId>javax.activation-api</artifactId>
+				</dependency>
+			</dependencies>
+			<build>
+				<finalName>${project.artifactId}</finalName>
+				<plugins>
+					<plugin>
+						<groupId>org.xolstice.maven.plugins</groupId>
+						<artifactId>protobuf-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<protocArtifact>com.google.protobuf:protoc:${protobuf-version}:exe:${os.detected.classifier}</protocArtifact>
+							<pluginId>grpc-java</pluginId>
+							<pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc-version}:exe:${os.detected.classifier}</pluginArtifact>
+							<protoSourceRoot>${project.build.directory}/protoc</protoSourceRoot>
+							<clearOutputDirectory>false</clearOutputDirectory>
+							<token><![CDATA[
+							
+								The reactor-grpc plugin is used to generate some bindings for the reactive operation on the Messages I/O.
+								
+								The .protos are inherited from the main project, and expanded with some operations present
+								on src/main/resources/protos/
+
+							]]></token>
+							<protocPlugins>
+								<protocPlugin>
+									<id>reactor-grpc</id>
+									<artifactId>reactor-grpc</artifactId>
+									<groupId>com.salesforce.servicelibs</groupId>
+									<version>${reactor-grpc-version}</version>
+									<mainClass>com.salesforce.reactorgrpc.ReactorGrpcGenerator</mainClass>
+								</protocPlugin>
+							</protocPlugins>
+						</configuration>
+						<dependencies>
+							<dependency>
+								<groupId>com.google.protobuf</groupId>
+								<artifactId>protobuf-java</artifactId>
+								<version>${protobuf-version}</version>
+							</dependency>
+						</dependencies>
+						<executions>
+							<execution>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>compile</goal>
+									<goal>compile-custom</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>test</id>
+								<phase>generate-test-sources</phase>
+								<goals>
+									<goal>test-compile</goal>
+									<goal>test-compile-custom</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>jdk8</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<jdk>1.8</jdk>
+			</activation>
+			<build>
+				<finalName>${project.artifactId}</finalName>
+				<plugins>
+					<plugin>
+						<artifactId>maven-jar-plugin</artifactId>
+						<configuration>
+							<classifier>jdk8</classifier>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<version>3.5.1</version>
+						<configuration>
+							<source>1.8</source>
+							<target>1.8</target>
+							<testSource>1.8</testSource>
+							<testTarget>1.8</testTarget>
+							<includes>
+								<include>${basedir}/src/main/java6/**/*.java</include>
+								<include>**/*.java</include>
+							</includes>
+							<excludes>
+								<exclude>${basedir}/src/main/java/sawtooth/sdk/reactive/common/messaging/MessageFactory.java</exclude>
+							</excludes>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.xolstice.maven.plugins</groupId>
+						<artifactId>protobuf-maven-plugin</artifactId>
+						<extensions>true</extensions>
+						<configuration>
+							<protocArtifact>com.google.protobuf:protoc:${protobuf-version}:exe:${os.detected.classifier}</protocArtifact>
+							<pluginId>grpc-java</pluginId>
+							<pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc-version}:exe:${os.detected.classifier}</pluginArtifact>
+							<protoSourceRoot>${project.build.directory}/protoc</protoSourceRoot>
+							<clearOutputDirectory>false</clearOutputDirectory>
+						</configuration>
+						<dependencies>
+							<dependency>
+								<groupId>com.google.protobuf</groupId>
+								<artifactId>protobuf-java</artifactId>
+								<version>${protobuf-version}</version>
+							</dependency>
+						</dependencies>
+						<executions>
+							<execution>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>compile</goal>
+									<goal>compile-custom</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>test</id>
+								<phase>generate-test-sources</phase>
+								<goals>
+									<goal>test-compile</goal>
+									<goal>test-compile-custom</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<dependencies>
 		<dependency>
 			<groupId>org.bitcoinj</groupId>
@@ -25,6 +193,11 @@
 					<artifactId>core</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>io.grpc</groupId>
+			<artifactId>grpc-stub</artifactId>
 		</dependency>
 
 		<dependency>
@@ -90,41 +263,10 @@
 			<artifactId>grpc-protobuf</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>io.grpc</groupId>
-			<artifactId>grpc-stub</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.salesforce.servicelibs</groupId>
-			<artifactId>reactor-grpc-stub</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>javax.activation-api</artifactId>
-		</dependency>
-
 	</dependencies>
 
 	<build>
-
+		<finalName>${project.artifactId}</finalName>
 		<extensions>
 			<extension>
 				<groupId>kr.motd.maven</groupId>
@@ -138,60 +280,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<groupId>org.xolstice.maven.plugins</groupId>
-				<artifactId>protobuf-maven-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<protocArtifact>com.google.protobuf:protoc:${protobuf-version}:exe:${os.detected.classifier}</protocArtifact>
-					<pluginId>grpc-java</pluginId>
-					<pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc-version}:exe:${os.detected.classifier}</pluginArtifact>
-					<protoSourceRoot>${project.build.directory}/protoc</protoSourceRoot>
-					<clearOutputDirectory>false</clearOutputDirectory>
-					<token><![CDATA[
-							
-								The reactor-grpc plugin is used to generate some bindings for the reactive operation on the Messages I/O.
-								
-								The .protos are inherited from the main project, and expanded with some operations present
-								on src/main/resources/protos/
-
-					]]></token>
-					<protocPlugins>
-						<protocPlugin>
-							<id>reactor-grpc</id>
-							<artifactId>reactor-grpc</artifactId>
-							<groupId>com.salesforce.servicelibs</groupId>
-							<version>${reactor-grpc-version}</version>
-							<mainClass>com.salesforce.reactorgrpc.ReactorGrpcGenerator</mainClass>
-						</protocPlugin>
-					</protocPlugins>
-				</configuration>
-				<dependencies>
-					<dependency>
-						<groupId>com.google.protobuf</groupId>
-						<artifactId>protobuf-java</artifactId>
-						<version>${protobuf-version}</version>
-					</dependency>
-				</dependencies>
-				<executions>
-					<execution>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>compile</goal>
-							<goal>compile-custom</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>test</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>test-compile</goal>
-							<goal>test-compile-custom</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
+		
 		<resources>
 			<resource>
 				<directory>../../../protos</directory>

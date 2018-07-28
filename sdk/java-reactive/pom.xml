@@ -16,6 +16,7 @@
 		<apachelog-version>2.11.0</apachelog-version>
 		<swagger-version>2.0.2</swagger-version>
 		<spongycastle-version>1.58.0.0</spongycastle-version>
+		<reactor-version>3.1.8.RELEASE</reactor-version>
 		<ERROR_LEVEL>INFO</ERROR_LEVEL>
 		<SAWTOOTH_LOG_LEVEL>INFO</SAWTOOTH_LOG_LEVEL>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -108,13 +109,13 @@
 				<artifactId>jaxb-api</artifactId>
 				<version>2.3.0</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-runtime</artifactId>
 				<version>2.3.0</version>
 			</dependency>
-			
+
 			<dependency>
 				<groupId>javax.activation</groupId>
 				<artifactId>javax.activation-api</artifactId>
@@ -171,10 +172,22 @@
 			</dependency>
 
 			<dependency>
+				<groupId>co.nstant.in</groupId>
+				<artifactId>cbor</artifactId>
+				<version>0.8</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
 				<version>6.14.3</version>
 				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-core</artifactId>
+				<version>${reactor-version}</version>
 			</dependency>
 
 		</dependencies>
@@ -234,6 +247,9 @@
 					<groupId>org.xolstice.maven.plugins</groupId>
 					<artifactId>protobuf-maven-plugin</artifactId>
 					<version>0.5.1</version>
+				</plugin>
+				<plugin>
+					<artifactId>maven-jar-plugin</artifactId>
 				</plugin>
 			</plugins>
 		</pluginManagement>
